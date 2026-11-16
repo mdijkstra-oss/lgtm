@@ -1,0 +1,54 @@
+version: 3
+
+components:
+  main:        { in: cmd/strigil }
+  search:      { in: internal/features/search }
+  search_ui:   { in: internal/features/search/ui }
+  search_cli:  { in: internal/features/search/cli }
+  gallery:     { in: internal/features/gallery }
+  gallery_cli: { in: internal/features/gallery/cli }
+  kit:         { in: [internal/kit, internal/kit/**] }
+  shell:       { in: internal/shell }
+  shell_cli:   { in: internal/shell/cli }
+
+vendors:
+  cobra:      { in: github.com/spf13/cobra }
+  fang:       { in: charm.land/fang/v2 }
+  bubbletea:  { in: charm.land/bubbletea/v2 }
+  bubbles:    { in: charm.land/bubbles/v2/** }
+  lipgloss:   { in: charm.land/lipgloss/v2 }
+  ansi:       { in: github.com/charmbracelet/x/ansi }
+  catppuccin: { in: github.com/catppuccin/go }
+
+deps:
+  # main only lists commands. The gallery's component list is the one place
+  # it reaches past the cli packages.
+  main:
+    mayDependOn: [search_cli, shell_cli, gallery_cli, search_ui, kit]
+    canUse: [cobra, fang]
+
+  # A command that prints: no interface code within reach.
+  search_cli:
+    mayDependOn: [search]
+    canUse: [cobra, lipgloss]
+
+  # The commands that open an interface.
+  shell_cli:
+    mayDependOn: [shell, kit, search_ui]
+    canUse: [cobra]
+  gallery_cli:
+    mayDependOn: [gallery, kit]
+    canUse: [cobra]
+
+  search_ui:
+    mayDependOn: [search, kit]
+    canUse: [bubbletea, lipgloss]
+  gallery:
+    mayDependOn: [kit]
+    canUse: [bubbletea, lipgloss]
+  kit:
+    mayDependOn: [kit]
+    canUse: [bubbletea, bubbles, lipgloss, ansi, catppuccin]
+  shell:
+    mayDependOn: [kit]
+    canUse: [bubbletea, lipgloss]
