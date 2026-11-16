@@ -1,0 +1,26 @@
+TIDE TABLE
+Heights in feet above the mark on the east wall.
+
+Morning tide and evening tide are given for each day of the week.
+A spring tide follows the new moon and the full moon by two days.
+A neap tide follows the quarters.
+
+day         morning   evening   note
+Monday      11.2      10.8      spring tide
+Tuesday     11.6      11.1      spring tide, weed on the lower step
+Wednesday   11.4      10.9
+Thursday    10.7      10.2
+Friday       9.8       9.4
+Saturday     8.9       8.6      neap tide
+Sunday       8.4       8.3      neap tide, the bar is dry at low water
+
+Reading the table
+The ferry needs nine feet over the bar. On a neap tide she waits outside.
+The crab boats need six and come and go as they like.
+When the wind is northerly the tide runs higher than the table says.
+When the glass is high the tide runs lower.
+
+Corrections
+Add four inches in a northerly gale.
+Take off three inches in settled weather.
+Never trust the table over the mark on the wall.

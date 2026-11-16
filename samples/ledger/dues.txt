@@ -1,0 +1,18 @@
+LEDGER OF HARBOUR DUES
+
+Every vessel that ties up pays by her length and by the tide she stays.
+
+vessel            length   tides   paid
+Marigold          31 ft    2       4 shillings
+Sea Thrift        24 ft    1       1 shilling 6
+Northern Lantern  58 ft    3       14 shillings
+Kittiwake         19 ft    1       1 shilling
+Ada and Ruth      27 ft    4       6 shillings
+Harbour Rose      22 ft    1       1 shilling 6
+Tern              16 ft    2       1 shilling 8
+
+Rules
+A vessel under twenty feet pays one shilling a tide.
+A vessel over fifty feet pays by agreement with the harbour master.
+Dues are entered in this ledger the same day and never from memory.
+A vessel sheltering from a gale pays nothing for the first tide.
