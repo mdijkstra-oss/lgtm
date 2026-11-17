@@ -7,12 +7,13 @@ import (
 	"charm.land/fang/v2"
 	"github.com/spf13/cobra"
 
+	askcli "strigil/internal/features/ask/cli"
 	introcli "strigil/internal/features/intro/cli"
 )
 
 // A subcommand lives in the cli package of whatever owns it and is listed
 // here.
-var commands = []func() *cobra.Command{introcli.Command}
+var commands = []func() *cobra.Command{askcli.Command, introcli.Command}
 
 func main() {
 	root := &cobra.Command{

@@ -2,6 +2,9 @@ version: 3
 
 components:
   main:      { in: cmd/strigil }
+  ask:       { in: internal/features/ask }
+  ask_ui:    { in: internal/features/ask/ui }
+  ask_cli:   { in: internal/features/ask/cli }
   intro_ui:  { in: internal/features/intro/ui }
   intro_cli: { in: internal/features/intro/cli }
   kit:       { in: [internal/kit, internal/kit/story, internal/kit/story/**] }
@@ -14,11 +17,14 @@ vendors:
   lipgloss:  { in: charm.land/lipgloss/v2 }
   harmonica: { in: github.com/charmbracelet/harmonica }
   tone:      { in: charm.land/tone }
+  bubbles:   { in: charm.land/bubbles/v2/** }
+  glamour:   { in: [charm.land/glamour/v2, charm.land/glamour/v2/**] }
+  xansi:     { in: github.com/charmbracelet/x/ansi }
 
 deps:
   # main only lists commands.
   main:
-    mayDependOn: [intro_cli]
+    mayDependOn: [ask_cli, intro_cli]
     canUse: [cobra, fang]
 
   # A feature's command reaches its interface; the interface never reaches
@@ -26,6 +32,13 @@ deps:
   intro_cli:
     mayDependOn: [intro_ui]
     canUse: [cobra]
+  # The command hands the interface the answers; both rest on the logic.
+  ask_cli:
+    mayDependOn: [ask, ask_ui]
+    canUse: [cobra]
+  ask_ui:
+    mayDependOn: [ask, kit, theme]
+    canUse: [bubbletea, bubbles, glamour, lipgloss, xansi]
   intro_ui:
     mayDependOn: [kit, theme]
     canUse: [bubbletea, lipgloss, harmonica]

@@ -45,7 +45,8 @@ from each repo's `go.mod` at that date.
 | Serve the TUI over SSH | Wish | `charm.land/wish/v2` |
 | A GIF or screenshot of the TUI for docs | VHS, Freeze | command-line tools |
 
-Already in `go.mod`: bubbletea, lipgloss, fang, harmonica, tone.
+Already in `go.mod`: bubbletea, bubbles, glamour, lipgloss, fang, harmonica,
+tone, x/ansi.
 
 **Not available anywhere in Charm:** charts, sparklines, gauges (nothing in
 `x` or Bubbles); a dialog/overlay stack, scrollbar, diff view, toast/status

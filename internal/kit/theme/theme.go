@@ -33,6 +33,15 @@ const (
 	Surface3 = tone.Iron
 )
 
+// Code, told apart by what each word is. Nowhere but in code.
+const (
+	CodeKeyword  = tone.Orchid
+	CodeType     = tone.Lichen
+	CodeFunction = tone.Anchovy
+	CodeString   = tone.Mojito
+	CodeNumber   = tone.Yam
+)
+
 // States. On an icon or a small tag, never as decoration.
 const (
 	Error   = tone.Sriracha
