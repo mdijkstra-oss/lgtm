@@ -3,8 +3,7 @@
 One folder per capability. A feature owns its logic, its command and its
 interface pieces, and does not import another feature.
 
-- `search/`: find text in the files of a folder.
-- `gallery/`: debug-only viewer for component stories.
+- `intro/`: the page strigil opens on.
 
 The shape of a feature, leaving out what it does not have:
 

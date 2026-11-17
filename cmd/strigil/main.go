@@ -7,18 +7,19 @@ import (
 	"charm.land/fang/v2"
 	"github.com/spf13/cobra"
 
-	searchcli "strigil/internal/features/search/cli"
-	shellcli "strigil/internal/shell/cli"
+	introcli "strigil/internal/features/intro/cli"
 )
 
 // A subcommand lives in the cli package of whatever owns it and is listed
-// here. Files behind a build tag add theirs from init.
-var commands = []func() *cobra.Command{searchcli.Command, shellcli.Command}
+// here.
+var commands = []func() *cobra.Command{introcli.Command}
 
 func main() {
 	root := &cobra.Command{
 		Use:   "strigil",
-		Short: "Search a folder from the command line or an interactive interface",
+		Short: "Scrape away the slop",
+		// With nothing asked for, the intro page.
+		RunE: func(cmd *cobra.Command, _ []string) error { return introcli.Command().RunE(cmd, nil) },
 	}
 	for _, c := range commands {
 		root.AddCommand(c())
