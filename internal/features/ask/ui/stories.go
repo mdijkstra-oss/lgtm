@@ -9,6 +9,7 @@ import (
 
 	"strigil/internal/features/ask"
 	"strigil/internal/kit/story"
+	"strigil/internal/kit/theme"
 )
 
 //go:embed about.md
@@ -50,6 +51,14 @@ func Stories() story.Component {
 			return m.render()
 		}
 	}
+	// light draws a story in the light theme, and puts the dark one back.
+	light := func(render func(w, h int) string) func(w, h int) string {
+		return func(w, h int) string {
+			use(theme.Light)
+			defer use(theme.Dark)
+			return render(w, h)
+		}
+	}
 	return story.Component{
 		Name:  "ask",
 		About: about,
@@ -63,6 +72,8 @@ func Stories() story.Component {
 			{Name: "opening another", Note: "The palette over a document.", W: 110, H: 34, Render: after("enter", "ctrl+k", "c", "a")},
 			{Name: "wide", Note: "A wide window: everything in the middle.", W: 160, H: 40, Render: after("enter")},
 			{Name: "narrow", Note: "80 columns.", W: 80, H: 24, Render: after("enter")},
+			{Name: "light palette", Note: "On a light terminal: the palette in the light theme.", W: 110, H: 34, Render: light(after())},
+			{Name: "light document", Note: "A document in the light theme.", W: 110, H: 34, Render: light(after("enter"))},
 			{Name: "too small", Note: "No room to draw in.", W: 50, H: 10, Render: after("enter")},
 		},
 	}

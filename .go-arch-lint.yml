@@ -22,6 +22,7 @@ vendors:
   bubbles:   { in: charm.land/bubbles/v2/** }
   glamour:   { in: [charm.land/glamour/v2, charm.land/glamour/v2/**] }
   xansi:     { in: github.com/charmbracelet/x/ansi }
+  chroma:    { in: github.com/alecthomas/chroma/v2/** }
 
 deps:
   # main only lists commands.
@@ -57,7 +58,7 @@ deps:
   # feature; the only place markdown is rendered.
   viewer:
     mayDependOn: [markdown, kit, theme]
-    canUse: [bubbletea, bubbles, glamour, lipgloss, xansi]
+    canUse: [bubbletea, bubbles, glamour, lipgloss, xansi, chroma]
   # The only place the palette is named.
   theme:
     canUse: [tone]

@@ -11,7 +11,6 @@ import (
 	"github.com/charmbracelet/x/ansi"
 
 	"strigil/internal/kit/markdown"
-	"strigil/internal/kit/theme"
 )
 
 // block is one cell of a document on screen, drawn from its own state
@@ -381,13 +380,15 @@ type swatch struct {
 	at int
 }
 
-var hues = map[string]color.Color{
-	"Primary": theme.Primary, "Secondary": theme.Secondary, "Accent": theme.Accent, "OnPrimary": theme.OnPrimary,
-	"Text1": theme.Text1, "Text2": theme.Text2, "Text3": theme.Text3, "Text4": theme.Text4, "Line": theme.Line,
-	"Surface0": theme.Surface0, "Surface1": theme.Surface1, "Surface2": theme.Surface2, "Surface3": theme.Surface3,
-	"CodeKeyword": theme.CodeKeyword, "CodeType": theme.CodeType, "CodeFunction": theme.CodeFunction,
-	"CodeString": theme.CodeString, "CodeNumber": theme.CodeNumber,
-	"Error": theme.Error, "Warning": theme.Warning, "Info": theme.Info, "Success": theme.Success,
+func hues() map[string]color.Color {
+	return map[string]color.Color{
+		"Primary": pal.Primary, "Secondary": pal.Secondary, "Accent": pal.Accent, "OnPrimary": pal.OnPrimary,
+		"Text1": pal.Text1, "Text2": pal.Text2, "Text3": pal.Text3, "Text4": pal.Text4, "Line": pal.Line,
+		"Surface0": pal.Surface0, "Surface1": pal.Surface1, "Surface2": pal.Surface2, "Surface3": pal.Surface3,
+		"CodeKeyword": pal.CodeKeyword, "CodeType": pal.CodeType, "CodeFunction": pal.CodeFunction,
+		"CodeString": pal.CodeString, "CodeNumber": pal.CodeNumber,
+		"Error": pal.Error, "Warning": pal.Warning, "Info": pal.Info, "Success": pal.Success,
+	}
 }
 
 func (c swatch) all() []string {
@@ -408,7 +409,7 @@ func (c swatch) about(int) int { return 2 * len(c.d.Groups) }
 
 func (c swatch) view(w int, on bool) []string {
 	var rows []string
-	n := 0
+	n, hues := 0, hues()
 	for _, g := range c.d.Groups {
 		var line strings.Builder
 		line.WriteString(" " + sDim.Render(fit(g.Name, 10)))

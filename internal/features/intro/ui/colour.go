@@ -24,29 +24,42 @@ func (a rgb) bytes() (r, g, b int) {
 }
 
 var (
-	ground = of(theme.Surface0)
-	plain  = of(theme.Text1)
-	calm   = of(theme.Text3) // a key
-	hush   = of(theme.Text4) // what a key does
-	rule   = of(theme.Line)
+	pal theme.Theme
 
-	// The blade: a pale rim, then the two brand colours cooling into the dark.
-	hot  = of(theme.Secondary)
-	deep = of(theme.Primary)
-	rim  = hot.mix(of(theme.OnPrimary), 0.6)
+	ground, plain rgb
+	calm          rgb // a key
+	hush          rgb // what a key does
+	rule          rgb
 
-	slopInk  = of(theme.Text4)
-	slopBack = of(theme.Surface3)
+	// The blade: a pale rim, then the two brand colours cooling into the
+	// ground.
+	hot, deep, rim rgb
+
+	slopInk, slopBack rgb
+
+	// The markers the sentences are gone over with: each runs from one
+	// colour to another along the sentence, and the words are punched out
+	// of it.
+	markers [][2]rgb
 )
 
-// The markers the sentences are gone over with: each runs from one colour
-// to another along the sentence, and the words are punched out of it.
-var markers = [][2]rgb{
-	{of(theme.Secondary), of(theme.Warning)},
-	{of(theme.Accent), of(theme.Info)},
-	{of(theme.Warning), of(theme.Success)},
-	{of(theme.Info), of(theme.Secondary)},
-	{of(theme.Secondary), of(theme.Accent)},
+func init() { use(theme.Dark) }
+
+// use draws everything from here on in that theme.
+func use(t theme.Theme) {
+	pal = t
+	ground, plain = of(t.Surface0), of(t.Text1)
+	calm, hush, rule = of(t.Text3), of(t.Text4), of(t.Line)
+	hot, deep = of(t.Secondary), of(t.Primary)
+	rim = hot.mix(of(t.OnPrimary), 0.6)
+	slopInk, slopBack = of(t.Text4), of(t.Surface3)
+	markers = [][2]rgb{
+		{of(t.Secondary), of(t.Warning)},
+		{of(t.Accent), of(t.Info)},
+		{of(t.Warning), of(t.Success)},
+		{of(t.Info), of(t.Secondary)},
+		{of(t.Secondary), of(t.Accent)},
+	}
 }
 
 // ink is the marker's colour over column x of a sentence.

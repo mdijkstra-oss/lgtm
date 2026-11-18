@@ -6,11 +6,13 @@ import (
 	"context"
 	"math"
 	"math/rand/v2"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/harmonica"
 
 	"strigil/internal/kit/theme"
@@ -62,6 +64,7 @@ func seeded(seed uint64) Model {
 }
 
 func Run(ctx context.Context) error {
+	use(theme.For(lipgloss.HasDarkBackground(os.Stdin, os.Stdout)))
 	_, err := tea.NewProgram(New(), tea.WithContext(ctx)).Run()
 	return err
 }
@@ -181,7 +184,7 @@ func (m Model) View() tea.View {
 	var v tea.View
 	v.AltScreen = true
 	v.WindowTitle = "strigil"
-	v.BackgroundColor = theme.Surface0
+	v.BackgroundColor = pal.Surface0
 	if m.w >= 60 && m.h >= 12 {
 		v.SetContent(m.render())
 	}

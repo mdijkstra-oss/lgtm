@@ -5,6 +5,7 @@ package ui
 
 import (
 	"context"
+	"os"
 	"slices"
 	"strings"
 
@@ -22,15 +23,26 @@ import (
 )
 
 var (
-	sHead   = lipgloss.NewStyle().Foreground(theme.Text1).Bold(true)
-	sName   = lipgloss.NewStyle().Foreground(theme.Text1)
-	sBody   = lipgloss.NewStyle().Foreground(theme.Text2)
-	sMeta   = lipgloss.NewStyle().Foreground(theme.Text3)
-	sDim    = lipgloss.NewStyle().Foreground(theme.Text4)
-	sRule   = lipgloss.NewStyle().Foreground(theme.Line)
-	sPick   = lipgloss.NewStyle().Background(theme.Primary).Foreground(theme.OnPrimary).Bold(true)
-	sPrompt = lipgloss.NewStyle().Foreground(theme.Accent)
+	pal theme.Theme
+
+	sHead, sName, sBody, sMeta, sDim, sRule, sPick, sPrompt lipgloss.Style
 )
+
+func init() { use(theme.Dark) }
+
+// use draws everything from here on in that theme, the documents too.
+func use(t theme.Theme) {
+	pal = t
+	viewer.Use(t)
+	sHead = lipgloss.NewStyle().Foreground(t.Text1).Bold(true)
+	sName = lipgloss.NewStyle().Foreground(t.Text1)
+	sBody = lipgloss.NewStyle().Foreground(t.Text2)
+	sMeta = lipgloss.NewStyle().Foreground(t.Text3)
+	sDim = lipgloss.NewStyle().Foreground(t.Text4)
+	sRule = lipgloss.NewStyle().Foreground(t.Line)
+	sPick = lipgloss.NewStyle().Background(t.Primary).Foreground(t.OnPrimary).Bold(true)
+	sPrompt = lipgloss.NewStyle().Foreground(t.Accent)
+}
 
 func wid(s string) int { return lipgloss.Width(s) }
 
@@ -61,7 +73,7 @@ func New(known []markdown.Doc) Model {
 	look := textinput.StyleState{Text: sName, Placeholder: sDim, Prompt: sPrompt}
 	in.SetStyles(textinput.Styles{
 		Focused: look, Blurred: look,
-		Cursor: textinput.CursorStyle{Color: theme.Secondary, Shape: tea.CursorBlock, Blink: true},
+		Cursor: textinput.CursorStyle{Color: pal.Secondary, Shape: tea.CursorBlock, Blink: true},
 	})
 	in.SetVirtualCursor(false)
 	in.Focus()
@@ -73,6 +85,7 @@ func New(known []markdown.Doc) Model {
 }
 
 func Run(ctx context.Context, known []markdown.Doc) error {
+	use(theme.For(lipgloss.HasDarkBackground(os.Stdin, os.Stdout)))
 	_, err := tea.NewProgram(New(known), tea.WithContext(ctx)).Run()
 	return err
 }
@@ -277,7 +290,7 @@ func (m Model) palette() (box string, x, y int) {
 			rows = append(rows, sBody.Render(fit("  "+found[i].Title, inner)))
 		}
 	}
-	box = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(theme.Primary).
+	box = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(pal.Primary).
 		Padding(1, 2).Render(strings.Join(rows, "\n"))
 	return box, (m.w - wid(box)) / 2, max(2, (m.h-lipgloss.Height(box))/3)
 }
@@ -286,7 +299,7 @@ func (m Model) View() tea.View {
 	var v tea.View
 	v.AltScreen = true
 	v.WindowTitle = "strigil"
-	v.BackgroundColor = theme.Surface0
+	v.BackgroundColor = pal.Surface0
 	if m.w == 0 {
 		return v
 	}

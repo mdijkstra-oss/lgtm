@@ -10,6 +10,7 @@ import (
 
 	"strigil/internal/kit/markdown"
 	"strigil/internal/kit/story"
+	"strigil/internal/kit/theme"
 )
 
 //go:embed about.md
@@ -75,6 +76,14 @@ func Stories() story.Component {
 			return strings.Join(rows, "\n")
 		}
 	}
+	// light draws a story in the light theme, and puts the dark one back.
+	light := func(render func(w, h int) string) func(w, h int) string {
+		return func(w, h int) string {
+			Use(theme.Light)
+			defer Use(theme.Dark)
+			return render(w, h)
+		}
+	}
 	return story.Component{
 		Name:  "viewer",
 		About: about,
@@ -93,6 +102,10 @@ func Stories() story.Component {
 			{Name: "bars", Note: "Two numbers a row, to one scale.", W: 110, H: 27, Render: after("7", "block", "right")},
 			{Name: "wide", Note: "A wide window: the document and its index in the middle.", W: 160, H: 33, Render: after()},
 			{Name: "narrow", Note: "80 columns: no room for the index.", W: 80, H: 17, Render: after()},
+			{Name: "light", Note: "On a light terminal: the light theme.", W: 110, H: 27, Render: light(after("3"))},
+			{Name: "light subsections", Note: "Buttons, marks and a swatch in the light theme.", W: 110, H: 27, Render: light(after("2", "block", "right", "down", "down", "right"))},
+			{Name: "light code", Note: "Code in the light theme.", W: 110, H: 27, Render: light(after("5", "block"))},
+			{Name: "light swatch", Note: "The light theme's own colours.", W: 110, H: 27, Render: light(after("6", "block", "right", "right"))},
 		},
 	}
 }
