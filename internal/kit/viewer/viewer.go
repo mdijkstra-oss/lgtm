@@ -196,7 +196,7 @@ func (m Model) read(msg tea.KeyPressMsg) Model {
 		b := t.block(stop{here.sec, here.blk})
 		if c := (*b).code(); c != nil && msg.String() == "enter" {
 			// The line that matters starts a third of the way down.
-			t.whole, t.wholeTop = c, c.Hot[0]-c.Line-m.h/3
+			t.whole, t.wholeTop = c, max(c.Hot[0], c.Show[0])-c.Line-m.h/3
 		}
 	}
 	return m

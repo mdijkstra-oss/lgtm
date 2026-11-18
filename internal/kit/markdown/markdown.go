@@ -49,7 +49,6 @@ type Cell struct {
 	Prose       string
 	Subsections *Subsections
 	Code        *Code
-	Swatch      *Swatch
 	Bars        *Bars
 }
 
@@ -97,19 +96,9 @@ type Code struct {
 	File  string
 	Line  int    // the number of the first line; 0 when the file could not be read
 	Show  [2]int // the first and last line shown before it is given the whole view
-	Hot   [2]int // the first and last line that matter
+	Hot   [2]int // the first and last line that matter; zero when none is marked
 	Lang  string
 	Lines []string
-}
-
-// Swatch is colours of the theme by name, in groups.
-type Swatch struct {
-	Groups []Group
-}
-
-type Group struct {
-	Name  string
-	Names []string
 }
 
 // Bars is rows of two numbers: lines added and lines removed.

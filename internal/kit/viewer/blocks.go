@@ -1,7 +1,6 @@
 package viewer
 
 import (
-	"image/color"
 	"slices"
 	"strconv"
 	"strings"
@@ -66,8 +65,6 @@ func build(c *markdown.Cell) block {
 		return p
 	case c.Code != nil:
 		return excerpt{c.Code}
-	case c.Swatch != nil:
-		return swatch{d: c.Swatch}
 	case c.Bars != nil:
 		return bars{d: c.Bars}
 	}
@@ -372,60 +369,6 @@ func (p subsections) buttons(w int, on bool) []string {
 		rows = append(rows, strings.Join(chips, " "))
 	}
 	return rows
-}
-
-// swatch shows colours of the theme as themselves.
-type swatch struct {
-	d  *markdown.Swatch
-	at int
-}
-
-func hues() map[string]color.Color {
-	return map[string]color.Color{
-		"Primary": pal.Primary, "Secondary": pal.Secondary, "Accent": pal.Accent, "OnPrimary": pal.OnPrimary,
-		"Text1": pal.Text1, "Text2": pal.Text2, "Text3": pal.Text3, "Text4": pal.Text4, "Line": pal.Line,
-		"Surface0": pal.Surface0, "Surface1": pal.Surface1, "Surface2": pal.Surface2, "Surface3": pal.Surface3,
-		"CodeKeyword": pal.CodeKeyword, "CodeType": pal.CodeType, "CodeFunction": pal.CodeFunction,
-		"CodeString": pal.CodeString, "CodeNumber": pal.CodeNumber,
-		"Error": pal.Error, "Warning": pal.Warning, "Info": pal.Info, "Success": pal.Success,
-	}
-}
-
-func (c swatch) all() []string {
-	var out []string
-	for _, g := range c.d.Groups {
-		out = append(out, g.Names...)
-	}
-	return out
-}
-
-func (c swatch) code() *markdown.Code { return nil }
-func (c swatch) keys() []key.Binding  { return nil }
-func (c swatch) count() int           { return len(c.all()) }
-func (c swatch) picked() int          { return c.at }
-func (c swatch) pick(i int) block     { c.at = i; return c }
-
-func (c swatch) about(int) int { return 2 * len(c.d.Groups) }
-
-func (c swatch) view(w int, on bool) []string {
-	var rows []string
-	n, hues := 0, hues()
-	for _, g := range c.d.Groups {
-		var line strings.Builder
-		line.WriteString(" " + sDim.Render(fit(g.Name, 10)))
-		for _, name := range g.Names {
-			line.WriteString(lipgloss.NewStyle().Foreground(hues[name]).Render("██"))
-			line.WriteString(" " + button("", name, at(n, c.at, on)) + "  ")
-			n++
-		}
-		rows = append(rows, line.String(), "")
-	}
-	name := c.all()[c.at]
-	said := "not a colour of the theme"
-	if col, ok := hues[name]; ok {
-		said = *hex(col)
-	}
-	return append(rows, " "+sName.Render("theme."+name)+sDim.Render(" • ")+sMeta.Render(said))
 }
 
 // bars draws two numbers a row as a bar: lines out to the left of a shared

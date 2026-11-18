@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"math"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -155,6 +156,54 @@ var (
 )
 
 // markdown renders text w cells wide and gives its rows.
+var (
+	// A colour as CSS writes one, alone in a code span.
+	named = regexp.MustCompile("`(#[0-9a-fA-F]{3,8}|(?:rgb|hsl)a?\\([^`()]*\\))`")
+	chip  = regexp.MustCompile(`■ (#[0-9a-fA-F]{3,8}|(?:rgb|hsl)a?\([^()]*\))`)
+	sgr   = regexp.MustCompile("\x1b\\[[0-9;]*m")
+)
+
+// swatched gives a colour named in a code span a cell to be shown in: put
+// in before the text is set, so that wrapping and tables count it.
+func swatched(text string) string {
+	lines, fenced := strings.Split(text, "\n"), false
+	for i, l := range lines {
+		if strings.HasPrefix(l, "```") {
+			fenced = !fenced
+		}
+		if fenced || strings.HasPrefix(l, "    ") || strings.HasPrefix(l, "\t") {
+			continue
+		}
+		lines[i] = named.ReplaceAllStringFunc(l, func(span string) string {
+			if _, ok := theme.Literal(span[1 : len(span)-1]); !ok {
+				return span
+			}
+			return "`■ " + span[1:]
+		})
+	}
+	return strings.Join(lines, "\n")
+}
+
+// chips colours each of those cells as the colour beside it.
+func chips(row string) string {
+	hits := chip.FindAllStringSubmatchIndex(row, -1)
+	for i := len(hits) - 1; i >= 0; i-- {
+		from := hits[i][0]
+		col, ok := theme.Literal(row[hits[i][2]:hits[i][3]])
+		if !ok {
+			continue
+		}
+		// The chip ends every style, so the one the words were in is
+		// started again after it.
+		was := ""
+		if all := sgr.FindAllString(row[:from], -1); len(all) > 0 {
+			was = all[len(all)-1]
+		}
+		row = row[:from] + lipgloss.NewStyle().Foreground(col).Render("█") + was + row[from+len("■"):]
+	}
+	return row
+}
+
 func typeset(text string, w int) []string {
 	which := strconv.Itoa(w)
 	key := which + "\x00" + text
@@ -166,11 +215,14 @@ func typeset(text string, w int) []string {
 		r, _ = glamour.NewTermRenderer(glamour.WithStyles(sheet()), glamour.WithWordWrap(w), glamour.WithChromaFormatter("terminal16m"))
 		renderers[which] = r
 	}
-	out, err := r.Render(text)
+	out, err := r.Render(swatched(text))
 	if err != nil {
 		out = text
 	}
 	rows := strings.Split(strings.Trim(out, "\n"), "\n")
+	for i := range rows {
+		rows[i] = chips(rows[i])
+	}
 	rendered[key] = rows
 	return rows
 }

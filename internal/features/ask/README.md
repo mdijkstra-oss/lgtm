@@ -8,7 +8,7 @@ uses both. What is its own is which documents there are, finding one by its
 title, and the frame they open in: a palette and a tab per document.
 
 No model writes documents yet. One written by hand is built in, which shows
-every block of the format and says what each is for.
+everything the viewer recognises and says what each is for.
 
 - `docs/`: the document built in.
 - `cli/`: `strigil ask`.

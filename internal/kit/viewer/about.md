@@ -30,15 +30,19 @@ of where either came from.
   A number goes to its section. The section the cursor is in is lit there.
 - The title or a heading with the cursor on it is lit across the column,
   fading out to the right, so going to one by number shows where it is.
-- The blocks:
-  - subsections: the third-level headings of a section, one shown at a time. They
-    are picked from a row of buttons, or from a drawing that names them: a
-    sequence, a row a message in the lane it goes to, or a graph, a row a
-    node under the first node that points at it. A subsection can carry a mark.
-    A subsection holds text and blocks, as a section does; on a line of a
-    block in a subsection, left and right are that block's.
-  - code: lines of a file, standing alone.
-  - a swatch: colours of the theme as themselves.
-  - bars: a bar a row, lines out to the left and in to the right.
+- Nothing a document says is syntax of the viewer's. It recognises ordinary
+  markdown and shows it as what it means:
+  - the third-level headings of a section are its subsections, one shown at
+    a time. They are picked from a row of buttons, or from a Mermaid drawing
+    that names them: a sequence, a row a message in the lane it goes to, or
+    a flowchart, a row a node under the first node that points at it. A ✓ or
+    ✗ before a name is a mark. A subsection holds text and blocks, as a
+    section does; on a line of a block in a subsection, left and right are
+    that block's.
+  - a link to lines of a file, alone on its line, is those lines.
+  - a table with a column of `+n` and one of `-n` is bars: a bar a row,
+    lines out to the left and in to the right.
+  - a colour in a code span, as hex, `rgb()` or `hsl()`, has a cell of that
+    colour before it.
 - A block shows the code of what is picked. Enter gives the code the whole
   view, with more of the file either side.

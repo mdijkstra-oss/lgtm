@@ -1,12 +1,20 @@
 // Package theme is every colour strigil draws with: a dark and a light
 // theme over the Charmtone palette. Dark is Crush's "Charmtone Pantera".
 //
-// A colour on screen is one of these, or a blend between two of them. The
-// test in this package fails on a colour made any other way. What each tier
+// A colour the interface is drawn in is one of these, or a blend between two
+// of them. The test in this package fails on a colour made any other way.
+// The one exception is Literal: a colour a document names, shown as itself. What each tier
 // is for is in docs/ux/README.md.
 package theme
 
-import "charm.land/tone"
+import (
+	"image/color"
+	"math"
+	"strconv"
+	"strings"
+
+	"charm.land/tone"
+)
 
 // Theme names each colour for its job.
 type Theme struct {
@@ -100,4 +108,63 @@ func For(dark bool) Theme {
 		return Dark
 	}
 	return Light
+}
+
+// Literal is a colour a document names by its value, so that it can be
+// shown as itself: #rgb, #rrggbb, #rrggbbaa, rgb(r, g, b) or hsl(h, s%, l%),
+// as CSS writes them. How see-through it is, if it says, is left out. It is
+// what the document is about, and never a colour to draw the interface in:
+// the test lets only the viewer ask.
+func Literal(s string) (color.Color, bool) {
+	s = strings.ToLower(strings.TrimSpace(s))
+	if hex, ok := strings.CutPrefix(s, "#"); ok {
+		switch len(hex) {
+		case 3:
+			hex = string([]byte{hex[0], hex[0], hex[1], hex[1], hex[2], hex[2]})
+		case 8:
+			hex = hex[:6]
+		}
+		n, err := strconv.ParseUint(hex, 16, 32)
+		return literal(n), err == nil && len(hex) == 6
+	}
+	kind, rest, ok := strings.Cut(s, "(")
+	if !ok || !strings.HasSuffix(rest, ")") {
+		return nil, false
+	}
+	// Commas, spaces and the slash before an alpha all part the numbers.
+	parts := strings.FieldsFunc(rest[:len(rest)-1], func(r rune) bool { return r == ',' || r == ' ' || r == '/' })
+	if len(parts) < 3 {
+		return nil, false
+	}
+	var n [3]float64
+	for i := range n {
+		v, err := strconv.ParseFloat(strings.TrimRight(parts[i], "%deg"), 64)
+		if err != nil || v < 0 {
+			return nil, false
+		}
+		n[i] = v
+	}
+	channel := func(v float64) literal { return literal(min(255, v+0.5)) }
+	switch kind {
+	case "rgb", "rgba":
+		return channel(n[0])<<16 | channel(n[1])<<8 | channel(n[2]), true
+	case "hsl", "hsla":
+		h, sat, l := n[0]/30, min(1, n[1]/100), min(1, n[2]/100)
+		a := sat * min(l, 1-l)
+		// https://www.w3.org/TR/css-color-4/#hsl-to-rgb
+		f := func(k float64) literal {
+			k = math.Mod(k+h, 12)
+			return channel(255 * (l - a*max(-1, min(k-3, 9-k, 1))))
+		}
+		return f(0)<<16 | f(8)<<8 | f(4), true
+	}
+	return nil, false
+}
+
+// literal is 0xrrggbb.
+type literal uint32
+
+func (l literal) RGBA() (r, g, b, a uint32) {
+	// 8 bits a channel to 16, as color.Color wants them.
+	return uint32(l>>16&0xff) * 0x101, uint32(l>>8&0xff) * 0x101, uint32(l&0xff) * 0x101, 0xffff
 }
