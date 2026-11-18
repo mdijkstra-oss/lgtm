@@ -280,10 +280,22 @@ func (t tab) lay(w int) (bare []string, rests []rest) {
 	text(-1, "", typeset("# "+t.d.Title, w-1), true)
 	cells(-1, "", t.intro)
 	for i, s := range t.secs {
-		text(i, "", typeset("## "+s.d.Title, w-1), true)
+		text(i, "", marked(typeset("## "+s.d.Title, w-1), s.d.Verdict()), true)
 		cells(i, "  ", s.blocks)
 	}
 	return rows[:len(rows)-1], rests
+}
+
+// marked gives a heading the mark its section came to, after its last word.
+func marked(rows []string, mark markdown.Mark) []string {
+	if mark == markdown.None {
+		return rows
+	}
+	rows = slices.Clone(rows)
+	last := len(rows) - 1
+	words := wid(strings.TrimRight(ansi.Strip(rows[last]), " "))
+	rows[last] = ansi.Truncate(rows[last], words, "") + " " + sign(mark == markdown.Holds)
+	return rows
 }
 
 // box draws a block in its outline. The outline is always there, so the

@@ -30,6 +30,7 @@ of where either came from.
   A number goes to its section. The section the cursor is in is a filled row there.
 - The title or a heading with the cursor on it is lit across the column,
   fading out to the right, so going to one by number shows where it is.
+  A section's heading has the mark its subsections came to, as the index has.
 - Nothing a document says is syntax of the viewer's. It recognises ordinary
   markdown and shows it as what it means:
   - the third-level headings of a section are its subsections, one shown at

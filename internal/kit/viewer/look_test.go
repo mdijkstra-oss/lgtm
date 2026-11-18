@@ -5,7 +5,20 @@ import (
 	"testing"
 
 	"github.com/charmbracelet/x/ansi"
+
+	"strigil/internal/kit/markdown"
 )
+
+func TestHeadingHasItsSectionsMark(t *testing.T) {
+	d, err := markdown.Parse("# T\n\n## Plain\n\nText.\n\n## Cases\n\n### ✓ one\n\nHolds.\n\n### ✗ two\n\nBreaks.\n", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	page := ansi.Strip(strings.Join(New(d).Size(100, 30).Rows(), "\n"))
+	if !strings.Contains(page, "## Cases ×") || strings.Contains(page, "## Plain ×") {
+		t.Errorf("headings drawn as:\n%s", page)
+	}
+}
 
 func TestColoursAreShown(t *testing.T) {
 	// The same colour three ways, and three that are not colours.

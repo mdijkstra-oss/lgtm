@@ -211,12 +211,3 @@ Here, commit `0e30354`, which replaced the first interface with the intro page:
 | kit/frame | +0 | -140 | |
 | kit/hints | +0 | -74 | |
 | kit/kit.go | +0 | -46 | |
-
-## Choosing
-
-- What happens when: a sequence, with a subsection a step.
-- What depends on what: a graph.
-- Is it always so: subsections marked ✓ and ✗.
-- What did this commit do: a table of lines added and removed.
-- Which colours: their values, in code spans.
-- Anything else: text, and a link to the few lines that must be read.
