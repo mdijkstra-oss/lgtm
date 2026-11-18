@@ -2,7 +2,7 @@
 
 Everything behind the binary.
 
-- `features/`: one folder per thing strigil can do.
+- `features/`: one folder per thing lgtm can do.
 - `kit/`: what features share; knows no feature.
 
 Who may import whom is written in `.go-arch-lint.yml` at the repo root and

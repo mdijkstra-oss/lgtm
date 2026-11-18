@@ -9,7 +9,7 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
-	"strigil/internal/kit/markdown"
+	"lgtm/internal/kit/markdown"
 )
 
 // block is one cell of a document on screen, drawn from its own state

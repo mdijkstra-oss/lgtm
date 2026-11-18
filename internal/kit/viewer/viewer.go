@@ -13,7 +13,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
 
-	"strigil/internal/kit/markdown"
+	"lgtm/internal/kit/markdown"
 )
 
 type tab struct {
@@ -202,9 +202,12 @@ func (m Model) read(msg tea.KeyPressMsg) Model {
 	return m
 }
 
+// Widest is how wide a document is set at most.
+const Widest = 88
+
 const (
 	edge   = 4 // the least room left of the text; the cell two before the text is the cursor's
-	widest = 88
+	widest = Widest
 	indexW = 30
 	gap    = 4
 )

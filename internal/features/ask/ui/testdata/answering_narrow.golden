@@ -1,0 +1,24 @@
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+    [1;38;2;236;235;240mHow does a markdown file become what is on screen in the viewer?[m            
+                                                                                
+    [38;2;255;96;255m⠸[m [38;2;191;188;200mreading…[m                                                [38;2;96;95;107m0:42 • 7 steps[m    
+                                                                                
+    [38;2;58;57;67m│[m [38;2;96;95;107mThe parser hands back a Doc of cells and never draws. So the next[m         
+    [38;2;58;57;67m│[m [38;2;96;95;107mthing to find is where a cell becomes something with a view: build in[m     
+    [38;2;58;57;67m│[m [38;2;96;95;107mblocks.go looks like it, and New calls it for every cell up front.[m        
+                                                                                
+    [38;2;96;95;107m✓[m [38;2;96;95;107mread  [m[38;2;133;131;146mREADME.md                                              [m  [38;2;96;95;107m5 lines[m    
+    [38;2;96;95;107m✓[m [38;2;96;95;107mlist  [m[38;2;133;131;146minternal/kit                                        [m  [38;2;96;95;107m14 entries[m    
+    [38;2;96;95;107m✓[m [38;2;96;95;107mgrep  [m[38;2;133;131;146mfunc Parse|viewer\.New in internal                [m  [38;2;96;95;107m6 in 4 files[m    
+    [38;2;96;95;107m✓[m [38;2;96;95;107mread  [m[38;2;133;131;146minternal/kit/markdown/parse.go                       [m  [38;2;96;95;107m150 lines[m    
+    [38;2;235;66;104m✗[m [38;2;96;95;107mread  [m[38;2;133;131;146minternal/kit/markdown/nothing.go                  [m  [38;2;96;95;107mno such file[m    
+    [38;2;96;95;107m✓[m [38;2;96;95;107mgit   [m[38;2;133;131;146mlog --oneline -20 -- internal/kit/viewer              [m  [38;2;96;95;107m20 lines[m    
+    [38;2;255;96;255m→[m [38;2;96;95;107mread  [m[38;2;236;235;240minternal/kit/viewer/viewer.go 84–240                          [m  [38;2;96;95;107m[m    
+                                                                                
+                                                                                
+                                                                                
+    [38;2;133;131;146mesc[m [38;2;96;95;107mstop[m[38;2;58;57;67m • [m[38;2;133;131;146mq[m [38;2;96;95;107mquit[m                                                           
+                                                                                

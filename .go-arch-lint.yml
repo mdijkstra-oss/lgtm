@@ -1,7 +1,7 @@
 version: 3
 
 components:
-  main:      { in: cmd/strigil }
+  main:      { in: cmd/lgtm }
   ask:       { in: internal/features/ask }
   ask_ui:    { in: internal/features/ask/ui }
   ask_cli:   { in: internal/features/ask/cli }
@@ -11,6 +11,8 @@ components:
   theme:     { in: internal/kit/theme }
   markdown:       { in: internal/kit/markdown }
   viewer:    { in: internal/kit/viewer }
+  llm:       { in: internal/kit/llm }
+  scrape:    { in: internal/kit/scrape }
 
 vendors:
   cobra:     { in: github.com/spf13/cobra }
@@ -23,6 +25,8 @@ vendors:
   glamour:   { in: [charm.land/glamour/v2, charm.land/glamour/v2/**] }
   xansi:     { in: github.com/charmbracelet/x/ansi }
   chroma:    { in: github.com/alecthomas/chroma/v2/** }
+  fantasy:   { in: charm.land/fantasy }
+  providers: { in: charm.land/fantasy/providers/** }
 
 deps:
   # main only lists commands.
@@ -36,19 +40,26 @@ deps:
     mayDependOn: [intro_ui]
     canUse: [cobra]
   # The command hands the interface the documents; both rest on the logic.
+  # The logic runs the model on the question, and never says which model.
   ask:
     mayDependOn: [markdown]
+    canUse: [fantasy]
+  # The command is where the model is asked for by name.
   ask_cli:
-    mayDependOn: [ask, ask_ui]
+    mayDependOn: [ask, ask_ui, llm]
     canUse: [cobra]
   # The frame round a viewer. It draws no document itself, so it has no
   # use for the markdown renderer.
   ask_ui:
-    mayDependOn: [ask, markdown, viewer, kit, theme]
+    mayDependOn: [ask, markdown, viewer, scrape, kit, theme]
     canUse: [bubbletea, bubbles, lipgloss, xansi]
   intro_ui:
+    mayDependOn: [scrape, kit, theme]
+    canUse: [bubbletea, lipgloss]
+  # How a page opens. It is handed the page and knows no feature.
+  scrape:
     mayDependOn: [kit, theme]
-    canUse: [bubbletea, lipgloss, harmonica]
+    canUse: [harmonica, xansi]
   kit:
     mayDependOn: [kit]
     canUse: [lipgloss]
@@ -59,6 +70,9 @@ deps:
   viewer:
     mayDependOn: [markdown, kit, theme]
     canUse: [bubbletea, bubbles, glamour, lipgloss, xansi, chroma]
+  # The only place a provider of models is named.
+  llm:
+    canUse: [fantasy, providers]
   # The only place the palette is named.
   theme:
     canUse: [tone]

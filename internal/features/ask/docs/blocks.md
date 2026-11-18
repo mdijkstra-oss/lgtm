@@ -40,25 +40,25 @@ The content is set only inside the `if`. Below that size the frame is empty, tho
 For a question about order: what happens when, and who calls whom. It is a Mermaid `sequenceDiagram`. Each message is drawn in the lane it goes to, and a message named as a subsection is that subsection, so the drawing is what the subsections are picked from.
 
     sequenceDiagram
-      participant strigil as cmd/strigil
-      strigil->>fang: Execute
-      fang->>strigil: RunE
+      participant lgtm as cmd/lgtm
+      lgtm->>fang: Execute
+      fang->>lgtm: RunE
 
     ### Execute
     Parses the arguments.
 
-Here, what plain `strigil` does up to its first frame:
+Here, what plain `lgtm` does up to its first frame:
 
 ```mermaid
 sequenceDiagram
-  participant strigil as cmd/strigil
+  participant lgtm as cmd/lgtm
   participant fang
   participant cli as intro/cli
   participant ui as intro/ui
-  strigil->>strigil: main
-  strigil->>fang: Execute
-  fang->>strigil: RunE
-  strigil->>cli: Command
+  lgtm->>lgtm: main
+  lgtm->>fang: Execute
+  fang->>lgtm: RunE
+  lgtm->>cli: Command
   cli->>ui: Run
   ui->>ui: Init
   ui->>ui: Update
@@ -68,7 +68,7 @@ sequenceDiagram
 ### main
 Builds the root command, adds each feature's command to it, and hands the lot to fang.
 
-[strigil/main.go](cmd/strigil/main.go#L18-L31)
+[lgtm/main.go](cmd/lgtm/main.go#L18-L31)
 
 ### Execute
 Parses the arguments and draws help and errors. With no subcommand it runs the root's own `RunE`.
@@ -76,10 +76,10 @@ Parses the arguments and draws help and errors. With no subcommand it runs the r
 ### RunE
 Nothing was asked for, so it builds intro's command and calls that. `main` may import a feature's `cli` package and nothing else, which is why it goes through the command.
 
-[strigil/main.go](cmd/strigil/main.go#L19-L23)
+[lgtm/main.go](cmd/lgtm/main.go#L19-L23)
 
 ### Command
-`strigil intro` arrives here directly.
+`lgtm intro` arrives here directly.
 
 [cli/cli.go](internal/features/intro/cli/cli.go#L10-L17)
 
@@ -108,7 +108,7 @@ Takes the alternate screen, sets the background, and draws when the window is at
 For what has no order: what imports what, what owns what. It is a Mermaid `flowchart`. Each node is a row under the first node that points at it. A node pointed at twice is named twice, and what it points at is drawn only the first time.
 
     flowchart TD
-      strigil["cmd/strigil"] --> askcli["ask/cli"]
+      lgtm["cmd/lgtm"] --> askcli["ask/cli"]
       askcli -->|runs| askui["ask/ui"]
 
     ### ask/ui
@@ -118,8 +118,8 @@ A node with no subsection is drawn and passed over. Here, the imports that give 
 
 ```mermaid
 flowchart TD
-  strigil["cmd/strigil"] --> askcli["ask/cli"]
-  strigil --> introcli["intro/cli"]
+  lgtm["cmd/lgtm"] --> askcli["ask/cli"]
+  lgtm --> introcli["intro/cli"]
   askcli -->|reads| ask
   askcli -->|runs| askui["ask/ui"]
   ask --> md["kit/markdown"]
@@ -131,13 +131,13 @@ flowchart TD
   introui --> theme
 ```
 
-### cmd/strigil
+### cmd/lgtm
 Lists the commands. It may import a feature's `cli` package and nothing else of it.
 
-[strigil/main.go](cmd/strigil/main.go#L14-L16)
+[lgtm/main.go](cmd/lgtm/main.go#L14-L16)
 
 ### ask/cli
-`strigil ask`: reads the documents and hands them to the frame.
+`lgtm ask`: reads the documents and hands them to the frame.
 
 ### ask
 The documents there are, and finding one by its title.
@@ -199,7 +199,7 @@ Here, commit `0e30354`, which replaced the first interface with the intro page:
 | features/intro | +838 | -0 | The command, the page, four snapshots and slop.txt. |
 | kit/theme | +162 | -112 | Rewritten onto tone, with the test that polices it. |
 | .go-arch-lint.yml | +24 | -41 | Rows for the removed packages went, rows for intro and theme came. |
-| cmd/strigil | +6 | -75 | gallery.go and its test went; main lists one command. |
+| cmd/lgtm | +6 | -75 | gallery.go and its test went; main lists one command. |
 | go.mod | +3 | -4 | bubbles and catppuccin went, tone and harmonica came. |
 | features/search | +0 | -1188 | The search command, its logic and its page. |
 | kit/palette | +0 | -787 | The ctrl+k palette. |

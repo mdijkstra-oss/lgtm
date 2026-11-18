@@ -10,7 +10,7 @@ import (
 
 	"charm.land/lipgloss/v2"
 
-	"strigil/internal/kit/story"
+	"lgtm/internal/kit/story"
 )
 
 // UpdateEnv, when set, makes Check rewrite the snapshots instead of comparing.

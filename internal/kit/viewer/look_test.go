@@ -6,7 +6,7 @@ import (
 
 	"github.com/charmbracelet/x/ansi"
 
-	"strigil/internal/kit/markdown"
+	"lgtm/internal/kit/markdown"
 )
 
 func TestHeadingHasItsSectionsMark(t *testing.T) {

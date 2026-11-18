@@ -1,9 +1,9 @@
-package ui
+package scrape
 
 import (
 	"image/color"
 
-	"strigil/internal/kit/theme"
+	"lgtm/internal/kit/theme"
 )
 
 // rgb is a colour as three numbers from 0 to 1, for doing sums with.
@@ -27,9 +27,6 @@ var (
 	pal theme.Theme
 
 	ground, plain rgb
-	calm          rgb // a key
-	hush          rgb // what a key does
-	rule          rgb
 
 	// The blade: a pale rim, then the two brand colours cooling into the
 	// ground.
@@ -43,13 +40,12 @@ var (
 	markers [][2]rgb
 )
 
-func init() { use(theme.Dark) }
+func init() { Use(theme.Dark) }
 
-// use draws everything from here on in that theme.
-func use(t theme.Theme) {
+// Use draws everything from here on in that theme.
+func Use(t theme.Theme) {
 	pal = t
 	ground, plain = of(t.Surface0), of(t.Text1)
-	calm, hush, rule = of(t.Text3), of(t.Text4), of(t.Line)
 	hot, deep = of(t.Secondary), of(t.Primary)
 	rim = hot.mix(of(t.OnPrimary), 0.6)
 	slopInk, slopBack = of(t.Text4), of(t.Surface3)

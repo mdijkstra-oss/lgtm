@@ -7,8 +7,8 @@ import (
 	"charm.land/fang/v2"
 	"github.com/spf13/cobra"
 
-	askcli "strigil/internal/features/ask/cli"
-	introcli "strigil/internal/features/intro/cli"
+	askcli "lgtm/internal/features/ask/cli"
+	introcli "lgtm/internal/features/intro/cli"
 )
 
 // A subcommand lives in the cli package of whatever owns it and is listed
@@ -17,10 +17,12 @@ var commands = []func() *cobra.Command{askcli.Command, introcli.Command}
 
 func main() {
 	root := &cobra.Command{
-		Use:   "strigil",
-		Short: "Scrape away the slop",
-		// With nothing asked for, the intro page.
-		RunE: func(cmd *cobra.Command, _ []string) error { return introcli.Command().RunE(cmd, nil) },
+		Use:   "lgtm [question]",
+		Short: "Looks good to me, said by someone who read it",
+		// What is not a command is a question; with nothing asked, the
+		// documents there are.
+		Args: cobra.ArbitraryArgs,
+		RunE: func(cmd *cobra.Command, args []string) error { return askcli.Command().RunE(cmd, args) },
 	}
 	for _, c := range commands {
 		root.AddCommand(c())

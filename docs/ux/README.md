@@ -630,7 +630,7 @@ Where the personality goes in a TUI, in order of how much it buys:
    would do, in places where nothing is at stake.
 2. **One hero moment.** A logo, an intro, a landing screen: the single place
    that gets the gradient, the brand texture and the full palette. Crush's is
-   its wordmark; strigil's is the blade. Everything after it is quiet.
+   its wordmark; lgtm's is the blade. Everything after it is quiet.
 3. **Motion with weight.** Things move as if they had mass (Harmonica springs
    and projectiles), settle, and stop. Physical, not decorative.
 4. **Small sparkle.** A two-part badge (dark label, pink value) is the site's

@@ -1,6 +1,7 @@
 // Package ui is where a document is opened and read: a palette to open one
 // by its title, and a tab per document open. The document itself is drawn
-// by kit/viewer.
+// by kit/viewer. A question asked on opening is answered here too: the page
+// shows what the model is doing until its document can be opened.
 package ui
 
 import (
@@ -16,16 +17,18 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
-	"strigil/internal/features/ask"
-	"strigil/internal/kit/markdown"
-	"strigil/internal/kit/theme"
-	"strigil/internal/kit/viewer"
+	"lgtm/internal/features/ask"
+	"lgtm/internal/kit/markdown"
+	"lgtm/internal/kit/scrape"
+	"lgtm/internal/kit/theme"
+	"lgtm/internal/kit/viewer"
 )
 
 var (
 	pal theme.Theme
 
 	sHead, sName, sBody, sMeta, sDim, sRule, sPick, sPrompt lipgloss.Style
+	sLive, sBad                                             lipgloss.Style
 )
 
 func init() { use(theme.Dark) }
@@ -34,6 +37,9 @@ func init() { use(theme.Dark) }
 func use(t theme.Theme) {
 	pal = t
 	viewer.Use(t)
+	scrape.Use(t)
+	sLive = lipgloss.NewStyle().Foreground(t.Secondary)
+	sBad = lipgloss.NewStyle().Foreground(t.Error)
 	sHead = lipgloss.NewStyle().Foreground(t.Text1).Bold(true)
 	sName = lipgloss.NewStyle().Foreground(t.Text1)
 	sBody = lipgloss.NewStyle().Foreground(t.Text2)
@@ -62,6 +68,12 @@ type Model struct {
 	input    textinput.Model
 	pick     int
 	help     help.Model
+
+	work *work // the question being answered, if one is
+
+	// The slop the page opens under, until the blade has been over it.
+	slop    scrape.Model
+	covered bool
 }
 
 const placeholder = "Open a document by its title"
@@ -84,11 +96,33 @@ func New(known []markdown.Doc) Model {
 	return Model{known: known, choosing: true, input: in, help: h}
 }
 
-func Run(ctx context.Context, known []markdown.Doc) error {
+// Asked is a question to have answered on opening.
+type Asked struct {
+	Question string
+	Write    func(ctx context.Context, on func(ask.Event)) (ask.Written, error)
+}
+
+// Run opens the page, covered, and has the question answered if there is
+// one. With none it opens on the palette.
+func Run(ctx context.Context, known []markdown.Doc, asked *Asked) error {
 	use(theme.For(lipgloss.HasDarkBackground(os.Stdin, os.Stdout)))
-	_, err := tea.NewProgram(New(known), tea.WithContext(ctx)).Run()
+	m := New(known)
+	m.slop, m.covered = scrape.New(), true
+	var start tea.Cmd
+	if asked != nil {
+		m, start = m.ask(ctx, *asked)
+	}
+	_, err := tea.NewProgram(started{m, tea.Batch(start, scrapeTick())}, tea.WithContext(ctx)).Run()
 	return err
 }
+
+// started is a page with what it has to set going first.
+type started struct {
+	Model
+	first tea.Cmd
+}
+
+func (s started) Init() tea.Cmd { return s.first }
 
 func (m Model) Init() tea.Cmd { return nil }
 
@@ -99,6 +133,7 @@ var (
 	keyPick  = key.NewBinding(key.WithKeys("up", "down"), key.WithHelp("↑/↓", "choose"))
 	keyOpen  = key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "open"))
 	keyClose = key.NewBinding(key.WithKeys("esc"), key.WithHelp("esc", "close"))
+	keyStop  = key.NewBinding(key.WithKeys("esc"), key.WithHelp("esc", "stop"))
 )
 
 // The tabs take three rows and a blank one above the document; the help
@@ -116,11 +151,21 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		for i := range m.tabs {
 			m.tabs[i] = m.tabs[i].Size(m.w, m.bodyH())
 		}
+		m.slop = m.slop.Size(m.w, m.h)
 		return m, nil
+	case scrapeMsg:
+		// Once the page is clean nothing of the slop moves, so its clock stops.
+		if m.slop = m.slop.Step(); m.slop.Busy() {
+			return m, scrapeTick()
+		}
+		m.covered = false
+		return m, nil
+	case workMsg, eventsMsg, doneMsg:
+		return m.working(msg)
 	case tea.KeyPressMsg:
 		switch {
 		case msg.String() == "ctrl+c":
-			return m, tea.Quit
+			return m.stop(), tea.Quit
 		case m.choosing:
 			return m.choose(msg)
 		}
@@ -177,9 +222,13 @@ func (m Model) read(msg tea.KeyPressMsg) (Model, tea.Cmd) {
 		m.input.Reset()
 		return m, nil
 	case "q":
-		return m, tea.Quit
+		return m.stop(), tea.Quit
+	case "esc":
+		if m.work != nil {
+			return m.stop(), nil
+		}
 	}
-	if len(m.tabs) == 0 {
+	if len(m.tabs) == 0 || m.work != nil {
 		return m, nil
 	}
 	switch msg.String() {
@@ -198,7 +247,10 @@ func (m Model) keys() []key.Binding {
 	if m.choosing {
 		return []key.Binding{keyPick, keyOpen, keyClose}
 	}
-	if len(m.tabs) == 0 {
+	if m.work != nil && m.work.err == nil {
+		return []key.Binding{keyStop, keyQuit}
+	}
+	if len(m.tabs) == 0 || m.work != nil {
 		return []key.Binding{keyDocs, keyQuit}
 	}
 	ks := m.tabs[m.cur].Keys()
@@ -215,7 +267,11 @@ func (m Model) render() string {
 		return m.page(lines)
 	}
 	left := strings.Repeat(" ", viewer.Left(m.w))
-	if len(m.tabs) == 0 {
+	if m.work != nil {
+		for i, row := range m.work.rows(min(viewer.Widest, m.w-2*viewer.Left(m.w)), m.bodyH()) {
+			lines[bodyY+i] = left + row
+		}
+	} else if len(m.tabs) == 0 {
 		lines[bodyY] = left + sDim.Render("Nothing open yet.")
 	} else {
 		for i, row := range m.tabline() {
@@ -298,9 +354,13 @@ func (m Model) palette() (box string, x, y int) {
 func (m Model) View() tea.View {
 	var v tea.View
 	v.AltScreen = true
-	v.WindowTitle = "strigil"
+	v.WindowTitle = "lgtm"
 	v.BackgroundColor = pal.Surface0
 	if m.w == 0 {
+		return v
+	}
+	if m.covered {
+		v.SetContent(m.slop.Over(strings.Split(m.render(), "\n")))
 		return v
 	}
 	v.SetContent(m.render())

@@ -14,8 +14,8 @@ import (
 	"github.com/alecthomas/chroma/v2/styles"
 	"github.com/charmbracelet/x/ansi"
 
-	"strigil/internal/kit/markdown"
-	"strigil/internal/kit/theme"
+	"lgtm/internal/kit/markdown"
+	"lgtm/internal/kit/theme"
 )
 
 // What each tier is for is in docs/ux/README.md.

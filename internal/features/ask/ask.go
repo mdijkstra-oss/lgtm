@@ -1,5 +1,5 @@
-// Package ask is the documents there are to read, and finding one by its
-// title.
+// Package ask is the documents there are to read, finding one by its
+// title, and having a model write a new one to answer a question.
 package ask
 
 import (
@@ -9,38 +9,52 @@ import (
 	"path/filepath"
 	"strings"
 
-	"strigil/internal/kit/markdown"
+	"lgtm/internal/kit/markdown"
 )
 
-// The documents there are, in the order the palette lists them. The one there
-// is shows every kind of block and says what each is for. It was written by
-// hand about this repository at the commit it names.
+// The document built in shows every kind of block and says what each is
+// for. It was written by hand about this repository at the commit it names.
 //
 //go:embed docs/*.md
 var files embed.FS
 
 var order = []string{"blocks"}
 
-// Docs gives the documents built in. The code they point at is read from
-// the repository the working directory is in.
-func Docs() []markdown.Doc {
+// Root gives the repository the working directory is in, or the working
+// directory when it is in none.
+func Root() string {
 	root, _ := os.Getwd()
 	for dir := root; ; dir = filepath.Dir(dir) {
 		if _, err := os.Stat(filepath.Join(dir, ".git")); err == nil {
-			root = dir
-			break
+			return dir
 		}
 		if dir == filepath.Dir(dir) {
-			break
+			return root
 		}
 	}
-	read := func(path string) ([]byte, error) { return os.ReadFile(filepath.Join(root, path)) }
+}
+
+// reader reads the files a document points at from that repository.
+func reader(root string) func(string) ([]byte, error) {
+	return func(path string) ([]byte, error) { return os.ReadFile(filepath.Join(root, path)) }
+}
+
+// Docs gives the documents there are, in the order the palette lists them:
+// those written for this repository, the newest first, then the one built in.
+func Docs() []markdown.Doc {
+	root := Root()
+	return append(Saved(root), Builtin(root)...)
+}
+
+// Builtin gives the documents built in. The code they point at is read
+// from root.
+func Builtin(root string) []markdown.Doc {
 	var out []markdown.Doc
 	for _, name := range order {
 		src, err := files.ReadFile("docs/" + name + ".md")
 		if err == nil {
 			var a markdown.Doc
-			if a, err = markdown.Parse(string(src), read); err == nil {
+			if a, err = markdown.Parse(string(src), reader(root)); err == nil {
 				out = append(out, a)
 				continue
 			}

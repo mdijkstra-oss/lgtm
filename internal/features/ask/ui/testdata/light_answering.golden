@@ -1,0 +1,34 @@
+                                                                                                              
+                                                                                                              
+                                                                                                              
+                                                                                                              
+    [1;38;2;32;31;38mHow does a markdown file become what is on screen in the viewer?[m                                          
+                                                                                                              
+    [38;2;233;64;176m⠸[m [38;2;58;57;67mreading…[m                                                                [38;2;133;131;146m0:42 • 7 steps[m                  
+                                                                                                              
+    [38;2;214;211;220m│[m [38;2;133;131;146mThe parser hands back a Doc of cells and never draws. So the next thing to find is[m                      
+    [38;2;214;211;220m│[m [38;2;133;131;146mwhere a cell becomes something with a view: build in blocks.go looks like it, and New[m                   
+    [38;2;214;211;220m│[m [38;2;133;131;146mcalls it for every cell up front.[m                                                                       
+                                                                                                              
+    [38;2;133;131;146m✓[m [38;2;133;131;146mread  [m[38;2;96;95;107mREADME.md                                                              [m  [38;2;133;131;146m5 lines[m                  
+    [38;2;133;131;146m✓[m [38;2;133;131;146mlist  [m[38;2;96;95;107minternal/kit                                                        [m  [38;2;133;131;146m14 entries[m                  
+    [38;2;133;131;146m✓[m [38;2;133;131;146mgrep  [m[38;2;96;95;107mfunc Parse|viewer\.New in internal                                [m  [38;2;133;131;146m6 in 4 files[m                  
+    [38;2;133;131;146m✓[m [38;2;133;131;146mread  [m[38;2;96;95;107minternal/kit/markdown/parse.go                                       [m  [38;2;133;131;146m150 lines[m                  
+    [38;2;235;66;104m✗[m [38;2;133;131;146mread  [m[38;2;96;95;107minternal/kit/markdown/nothing.go                                  [m  [38;2;133;131;146mno such file[m                  
+    [38;2;133;131;146m✓[m [38;2;133;131;146mgit   [m[38;2;96;95;107mlog --oneline -20 -- internal/kit/viewer                              [m  [38;2;133;131;146m20 lines[m                  
+    [38;2;233;64;176m→[m [38;2;133;131;146mread  [m[38;2;32;31;38minternal/kit/viewer/viewer.go 84–240                                          [m  [38;2;133;131;146m[m                  
+                                                                                                              
+                                                                                                              
+                                                                                                              
+                                                                                                              
+                                                                                                              
+                                                                                                              
+                                                                                                              
+                                                                                                              
+                                                                                                              
+                                                                                                              
+                                                                                                              
+                                                                                                              
+                                                                                                              
+    [38;2;96;95;107mesc[m [38;2;133;131;146mstop[m[38;2;214;211;220m • [m[38;2;96;95;107mq[m [38;2;133;131;146mquit[m                                                                                         
+                                                                                                              

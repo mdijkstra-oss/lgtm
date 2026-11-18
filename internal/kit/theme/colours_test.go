@@ -93,7 +93,7 @@ func TestNoColourOutsideTheTheme(t *testing.T) {
 					return true
 				}
 				switch names[pkg.Name] {
-				case "strigil/" + themeDir:
+				case "lgtm/" + themeDir:
 					// A colour from a document is content. Only what shows
 					// documents has a use for one.
 					if n.Sel.Name == "Literal" && filepath.ToSlash(filepath.Dir(rel)) != "internal/kit/viewer" {

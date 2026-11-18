@@ -4,7 +4,7 @@ package cli
 import (
 	"github.com/spf13/cobra"
 
-	"strigil/internal/features/intro/ui"
+	"lgtm/internal/features/intro/ui"
 )
 
 func Command() *cobra.Command {

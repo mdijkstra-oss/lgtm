@@ -1,10 +1,11 @@
-# strigil
+# lgtm
 
 ## Setup
 
     make setup   once per clone: installs the pre-commit hook (lefthook.yml)
     make test    tests, with and without the gallery
     make lint    vet and the import boundaries
+    make run     runs lgtm with what .env names; ARGS='"a question"' asks one
 
 ## Folder READMEs
 

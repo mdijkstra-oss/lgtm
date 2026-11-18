@@ -1,4 +1,4 @@
-package ui
+package scrape
 
 import (
 	_ "embed"

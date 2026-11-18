@@ -8,9 +8,9 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
-	"strigil/internal/kit/markdown"
-	"strigil/internal/kit/story"
-	"strigil/internal/kit/theme"
+	"lgtm/internal/kit/markdown"
+	"lgtm/internal/kit/story"
+	"lgtm/internal/kit/theme"
 )
 
 //go:embed about.md

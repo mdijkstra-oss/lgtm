@@ -1,6 +1,7 @@
 # intro
 
-The page strigil opens on: a screen of slop, scraped clean by a blade.
+A screen of slop, scraped clean by a blade, with nothing under it. Every
+page of lgtm opens this way (`kit/scrape`); this is the scraping alone.
 
-- `cli/`: `strigil intro`; plain `strigil` opens it too.
+- `cli/`: `lgtm intro`.
 - `ui/`: the page. See `ui/about.md`.

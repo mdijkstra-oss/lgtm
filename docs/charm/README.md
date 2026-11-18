@@ -139,7 +139,7 @@ acceleration), framework-agnostic. Used by the intro.
 
 ### fang ✓ — `charm.land/fang/v2`
 Wraps a Cobra command: styled help and usage, styled errors, `--version`,
-man page, shell completions, a colour scheme hook. Used by `cmd/strigil`.
+man page, shell completions, a colour scheme hook. Used by `cmd/lgtm`.
 
 ### log ✓ — `charm.land/log/v2`
 Levelled logger with key/values; text, JSON and logfmt formatters; styles per

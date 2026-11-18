@@ -1,4 +1,4 @@
-// Package theme is every colour strigil draws with: a dark and a light
+// Package theme is every colour lgtm draws with: a dark and a light
 // theme over the Charmtone palette. Dark is Crush's "Charmtone Pantera".
 //
 // A colour the interface is drawn in is one of these, or a blend between two

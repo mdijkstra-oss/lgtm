@@ -3,8 +3,9 @@
 One folder per capability. A feature owns its logic, its command and its
 interface pieces, and does not import another feature.
 
-- `ask/`: documents about the codebase, and a place to open them.
-- `intro/`: the page strigil opens on.
+- `ask/`: a question about the codebase answered with a document, and a
+  place to open the documents there are.
+- `intro/`: the slop and the blade, on a page of their own.
 
 The shape of a feature, leaving out what it does not have:
 
@@ -15,4 +16,4 @@ The shape of a feature, leaving out what it does not have:
 `cli/` and `ui/` both call the logic; neither reimplements it.
 
 A new feature also gets its rows in `.go-arch-lint.yml` and its command in
-`cmd/strigil/main.go`.
+`cmd/lgtm/main.go`.
