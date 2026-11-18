@@ -6,6 +6,7 @@
     make test    tests, with and without the gallery
     make lint    vet and the import boundaries
     make run     runs lgtm with what .env names; ARGS='"a question"' asks one
+    make demo    records docs/demo.gif for the README, from docs/demo.tape
 
 ## Folder READMEs
 
