@@ -15,3 +15,9 @@ subfolder holds. The big picture only, so it survives a refactor.
 When a change alters what a folder is for, or adds, removes or renames one of
 its subfolders, update that README in the same commit. `go test ./...` fails
 when a README is missing or does not name a subfolder.
+
+## Seeing the interface
+
+To see the interface in colour, record it with `vhs`: a `.tape` script runs
+the program, sends the keys and writes a PNG or a GIF. Never render terminal
+output to HTML, and never open a browser for it.
