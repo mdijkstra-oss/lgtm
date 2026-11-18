@@ -159,7 +159,7 @@ var (
 var (
 	// A colour as CSS writes one, alone in a code span.
 	named = regexp.MustCompile("`(#[0-9a-fA-F]{3,8}|(?:rgb|hsl)a?\\([^`()]*\\))`")
-	chip  = regexp.MustCompile(`■ (#[0-9a-fA-F]{3,8}|(?:rgb|hsl)a?\([^()]*\))`)
+	chip  = regexp.MustCompile("■\u00a0(#[0-9a-fA-F]{3,8}|(?:rgb|hsl)a?\\([^()]*\\))")
 	sgr   = regexp.MustCompile("\x1b\\[[0-9;]*m")
 )
 
@@ -178,7 +178,8 @@ func swatched(text string) string {
 			if _, ok := theme.Literal(span[1 : len(span)-1]); !ok {
 				return span
 			}
-			return "`■ " + span[1:]
+			// Joined so that no line breaks between the cell and the colour.
+			return "`■\u00a0" + strings.ReplaceAll(span[1:], " ", "\u00a0")
 		})
 	}
 	return strings.Join(lines, "\n")
@@ -189,7 +190,7 @@ func chips(row string) string {
 	hits := chip.FindAllStringSubmatchIndex(row, -1)
 	for i := len(hits) - 1; i >= 0; i-- {
 		from := hits[i][0]
-		col, ok := theme.Literal(row[hits[i][2]:hits[i][3]])
+		col, ok := theme.Literal(strings.ReplaceAll(row[hits[i][2]:hits[i][3]], "\u00a0", " "))
 		if !ok {
 			continue
 		}
@@ -199,17 +200,116 @@ func chips(row string) string {
 		if all := sgr.FindAllString(row[:from], -1); len(all) > 0 {
 			was = all[len(all)-1]
 		}
-		row = row[:from] + lipgloss.NewStyle().Foreground(col).Render("█") + was + row[from+len("■"):]
+		row = row[:from] + lipgloss.NewStyle().Foreground(col).Render("█") + was + strings.ReplaceAll(row[from+len("■"):hits[i][1]], "\u00a0", " ") + row[hits[i][1]:]
 	}
 	return row
 }
 
+// piece is a run of a text: its words, or code that stands among them.
+type piece struct {
+	text string
+	code bool
+}
+
+var listItem = regexp.MustCompile(`^ {0,3}(?:[-*+]|\d+[.)])\s`)
+
+// pieces tells the code of a text from its words. Code with no language
+// named is given as plain text, so that none is guessed for it.
+func pieces(text string) []piece {
+	var out []piece
+	var words []string
+	flush := func() {
+		if strings.TrimSpace(strings.Join(words, "")) != "" {
+			out = append(out, piece{text: strings.Join(words, "\n")})
+		}
+		words = nil
+	}
+	code := func(lang string, body []string) {
+		flush()
+		if lang == "" {
+			lang = "text"
+		}
+		out = append(out, piece{"````" + lang + "\n" + strings.Join(body, "\n") + "\n````", true})
+	}
+	set := func(l string) bool { return strings.HasPrefix(l, "    ") || strings.HasPrefix(l, "\t") }
+	lines, inList := strings.Split(text, "\n"), false
+	for i := 0; i < len(lines); i++ {
+		l := lines[i]
+		if fence := l[:len(l)-len(strings.TrimLeft(l, "`"))]; len(fence) >= 3 {
+			end := i + 1
+			for end < len(lines) && strings.TrimSpace(lines[end]) != fence {
+				end++
+			}
+			code(strings.TrimSpace(l[len(fence):]), lines[i+1:min(end, len(lines))])
+			i = end
+			continue
+		}
+		// Set in by four under a list it is more of the list.
+		if set(l) && !inList && (i == 0 || strings.TrimSpace(lines[i-1]) == "") {
+			end := i
+			for n := i; n < len(lines) && (set(lines[n]) || strings.TrimSpace(lines[n]) == ""); n++ {
+				if set(lines[n]) {
+					end = n
+				}
+			}
+			var body []string
+			for _, b := range lines[i : end+1] {
+				body = append(body, strings.TrimPrefix(strings.TrimPrefix(b, "\t"), "    "))
+			}
+			code("", body)
+			i = end
+			continue
+		}
+		if listItem.MatchString(l) {
+			inList = true
+		} else if strings.TrimSpace(l) != "" && !strings.HasPrefix(l, " ") {
+			inList = false
+		}
+		words = append(words, l)
+	}
+	flush()
+	return out
+}
+
+// typeset renders text w cells wide and gives its rows. Code among the
+// words has a rail down its side, to be told from them.
 func typeset(text string, w int) []string {
-	which := strconv.Itoa(w)
-	key := which + "\x00" + text
+	key := strconv.Itoa(w) + "\x00" + text
 	if rows, ok := rendered[key]; ok {
 		return rows
 	}
+	var rows []string
+	for _, p := range pieces(text) {
+		if len(rows) > 0 {
+			rows = append(rows, "")
+		}
+		if !p.code {
+			rows = append(rows, set(p.text, w)...)
+			continue
+		}
+		for _, r := range set(p.text, w-2) {
+			rows = append(rows, sBlock.Render("│")+" "+r)
+		}
+	}
+	rendered[key] = rows
+	return rows
+}
+
+// set is Glamour's rows for a text, with no blank ones before or after.
+func set(text string, w int) []string {
+	rows := glamoured(text, w)
+	blank := func(s string) bool { return strings.TrimSpace(ansi.Strip(s)) == "" }
+	for len(rows) > 1 && blank(rows[0]) {
+		rows = rows[1:]
+	}
+	for len(rows) > 1 && blank(rows[len(rows)-1]) {
+		rows = rows[:len(rows)-1]
+	}
+	return rows
+}
+
+func glamoured(text string, w int) []string {
+	which := strconv.Itoa(w)
 	r := renderers[which]
 	if r == nil {
 		r, _ = glamour.NewTermRenderer(glamour.WithStyles(sheet()), glamour.WithWordWrap(w), glamour.WithChromaFormatter("terminal16m"))
@@ -223,7 +323,6 @@ func typeset(text string, w int) []string {
 	for i := range rows {
 		rows[i] = chips(rows[i])
 	}
-	rendered[key] = rows
 	return rows
 }
 
@@ -232,7 +331,7 @@ func shade(c *markdown.Code) []string {
 	if rows, ok := shaded[c]; ok {
 		return rows
 	}
-	rows := typeset("```"+c.Lang+"\n"+strings.Join(c.Lines, "\n")+"\n```", 400)
+	rows := glamoured("````"+c.Lang+"\n"+strings.Join(c.Lines, "\n")+"\n````", 400)
 	// Glamour sets a code block off with a blank row either side. They come
 	// off evenly: the code's own first or last line may be blank too.
 	if extra := len(rows) - len(c.Lines); extra > 0 && extra%2 == 0 {

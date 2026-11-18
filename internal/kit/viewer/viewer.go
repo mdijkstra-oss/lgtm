@@ -456,17 +456,21 @@ func (t tab) index(in int) []string {
 	for n, d := range all {
 		i := n - 1
 		mark := d.Verdict()
-		bar, title, stop := " ", sMeta, sDim.Render("○")
-		if mark != markdown.None {
-			stop = sign(mark == markdown.Holds)
-		}
-		if i == in {
-			bar, title = sHere.Render("▌"), sHead
-		}
 		if n > 0 {
 			rows = append(rows, " "+rail)
 		}
-		rows = append(rows, bar+stop+" "+sDim.Render(strconv.Itoa(n+1))+"  "+title.Render(ansi.Truncate(d.Title, indexW-6, "…")))
+		name := ansi.Truncate(d.Title, indexW-6, "…")
+		if i == in {
+			// Filled, as a chosen row is: the mark keeps its shape and gives up its colour.
+			stop := map[markdown.Mark]string{markdown.None: "●", markdown.Holds: "✓", markdown.Breaks: "×"}[mark]
+			rows = append(rows, sHere.Render("▌")+sPick.Render(fit(stop+" "+strconv.Itoa(n+1)+"  "+name, indexW-1)))
+			continue
+		}
+		stop := sDim.Render("○")
+		if mark != markdown.None {
+			stop = sign(mark == markdown.Holds)
+		}
+		rows = append(rows, " "+stop+" "+sMeta.Render(strconv.Itoa(n+1))+"  "+sBody.Render(name))
 	}
 	return rows
 }

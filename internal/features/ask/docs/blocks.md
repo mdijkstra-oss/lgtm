@@ -162,7 +162,7 @@ For a few lines the reader has to see to follow the text. It is an ordinary link
 
     [markdown/parse.go](internal/kit/markdown/parse.go#L12-L18)
 
-[markdown/parse.go](internal/kit/markdown/parse.go#L141-L142)
+[markdown/parse.go](internal/kit/markdown/parse.go#L142-L143)
 
 A fence with code in it stays what it is anywhere, code in the colours of its language:
 

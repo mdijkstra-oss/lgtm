@@ -24,3 +24,25 @@ func TestColoursAreShown(t *testing.T) {
 		t.Error("a colour in a fence was shown")
 	}
 }
+
+func TestCodeAmongWordsHasARail(t *testing.T) {
+	rows := typeset("Words.\n\n    ### not a heading\n    is := 1\n\nMore words.", 60)
+	// Rows are padded; only the shape is compared.
+	var got []string
+	for _, r := range rows {
+		got = append(got, strings.TrimRight(ansi.Strip(r), " "))
+	}
+	if want := "Words.\n\n│ ### not a heading\n│ is := 1\n\nMore words."; strings.Join(got, "\n") != want {
+		t.Errorf("got:\n%s\nwant:\n%s", strings.Join(got, "\n"), want)
+	}
+	// Under a list item it is more of the item.
+	if list := ansi.Strip(strings.Join(typeset("- one\n\n    more of one", 60), "\n")); strings.Contains(list, "│") {
+		t.Errorf("a list's own lines were taken for code:\n%s", list)
+	}
+	// A colour is not parted from its cell by the end of a line.
+	for _, r := range typeset("It can be one or another, even `rgb(104, 255, 214)`.", 34) {
+		if strings.HasSuffix(strings.TrimRight(ansi.Strip(r), " "), "█") {
+			t.Errorf("a cell was left at the end of a line: %q", ansi.Strip(r))
+		}
+	}
+}

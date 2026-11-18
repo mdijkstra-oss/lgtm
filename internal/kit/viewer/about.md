@@ -27,7 +27,7 @@ of where either came from.
 - Beside the document is the index: the title and then the sections,
   down a rail. Each has the
   mark its subsections came to, and its number.
-  A number goes to its section. The section the cursor is in is lit there.
+  A number goes to its section. The section the cursor is in is a filled row there.
 - The title or a heading with the cursor on it is lit across the column,
   fading out to the right, so going to one by number shows where it is.
 - Nothing a document says is syntax of the viewer's. It recognises ordinary
@@ -44,5 +44,8 @@ of where either came from.
     lines out to the left and in to the right.
   - a colour in a code span, as hex, `rgb()` or `hsl()`, has a cell of that
     colour before it.
+  - code among the words, fenced or set in by four, has a rail down its
+    side. It is coloured as its language when the fence names one, and
+    not at all otherwise.
 - A block shows the code of what is picked. Enter gives the code the whole
   view, with more of the file either side.

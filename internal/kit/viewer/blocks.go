@@ -250,7 +250,7 @@ func (p subsections) sequence(w int, on bool) []string {
 	lane := w / len(p.d.Lanes)
 	var head []seg
 	for i, l := range p.d.Lanes {
-		head = append(head, seg{i*lane + 1, ansi.Truncate(l, lane-3, "…"), sDim})
+		head = append(head, seg{i*lane + 1, ansi.Truncate(l, lane-3, "…"), sMeta})
 	}
 	rows := []string{placed(head...), ""}
 	prev := -1
@@ -293,9 +293,16 @@ func (p subsections) graph(on bool) []string {
 	}
 	var rows []string
 	drawn := map[string]bool{}
-	var draw func(n, lead, arrow string)
-	draw = func(n, lead, arrow string) {
-		row := sRule.Render(lead+arrow) + p.name(n, on)
+	var draw func(n, lead, arrow, label string)
+	draw = func(n, lead, arrow, label string) {
+		row := sDim.Render(lead + arrow)
+		if label != "" {
+			row += " " + sMeta.Render(label) + " " + sDim.Render("─")
+		}
+		if arrow != "" {
+			row += sDim.Render("▶")
+		}
+		row += p.name(n, on)
 		if drawn[n] && len(next[n]) > 0 {
 			rows = append(rows, row+sDim.Render("↑"))
 			return
@@ -315,20 +322,17 @@ func (p subsections) graph(on bool) []string {
 			if i == len(next[n])-1 {
 				a = "└─"
 			}
-			if e.Label != "" {
-				a += " " + e.Label + " ─"
-			}
-			draw(e.To, lead, a+"▶")
+			draw(e.To, lead, a, e.Label)
 		}
 	}
 	for _, n := range order {
 		if into[n] == 0 {
-			draw(n, " ", "")
+			draw(n, " ", "", "")
 		}
 	}
 	// Nothing is pointed at by nothing when the arrows go round.
 	if len(rows) == 0 {
-		draw(order[0], " ", "")
+		draw(order[0], " ", "", "")
 	}
 	return rows
 }
@@ -417,7 +421,7 @@ func (b bars) view(w int, on bool) []string {
 			seg{0, button("", fit(p.Name, nameW), at(i, b.at, on)), lipgloss.NewStyle()},
 			seg{mid - wid(out), out, sBad},
 			seg{mid, in, sOK},
-			seg{w - wid(count), count, sDim},
+			seg{w - wid(count), count, sMeta},
 		))
 	}
 	p := b.d.Rows[b.at]
