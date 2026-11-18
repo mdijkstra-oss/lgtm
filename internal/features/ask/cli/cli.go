@@ -1,4 +1,4 @@
-// Package cli is the command that opens the page to ask on.
+// Package cli is the command that opens the documents.
 package cli
 
 import (
@@ -11,8 +11,8 @@ import (
 func Command() *cobra.Command {
 	return &cobra.Command{
 		Use:   "ask",
-		Short: "Ask about the codebase and read the answer",
+		Short: "Read a document about the codebase",
 		Args:  cobra.NoArgs,
-		RunE:  func(cmd *cobra.Command, _ []string) error { return ui.Run(cmd.Context(), ask.Answers()) },
+		RunE:  func(cmd *cobra.Command, _ []string) error { return ui.Run(cmd.Context(), ask.Docs()) },
 	}
 }

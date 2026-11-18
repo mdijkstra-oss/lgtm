@@ -8,7 +8,7 @@ import (
 )
 
 // Packages under kit that draw nothing on their own.
-var exempt = map[string]bool{"story": true, "theme": true}
+var exempt = map[string]bool{"markdown": true, "story": true, "theme": true}
 
 // Every package that draws has to describe itself in the story format.
 func TestEveryComponentHasStories(t *testing.T) {

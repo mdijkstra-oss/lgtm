@@ -1,4 +1,4 @@
-package ui
+package viewer
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
-	"strigil/internal/features/ask"
+	"strigil/internal/kit/markdown"
 	"strigil/internal/kit/theme"
 )
 
@@ -130,11 +130,11 @@ func sheet() gansi.StyleConfig {
 var (
 	renderers = map[string]*glamour.TermRenderer{}
 	rendered  = map[string][]string{}
-	shaded    = map[*ask.Code][]string{}
+	shaded    = map[*markdown.Code][]string{}
 )
 
 // markdown renders text w cells wide and gives its rows.
-func markdown(text string, w int) []string {
+func typeset(text string, w int) []string {
 	which := strconv.Itoa(w)
 	key := which + "\x00" + text
 	if rows, ok := rendered[key]; ok {
@@ -155,11 +155,11 @@ func markdown(text string, w int) []string {
 }
 
 // shade gives a file's lines with their syntax told apart, one row a line.
-func shade(c *ask.Code) []string {
+func shade(c *markdown.Code) []string {
 	if rows, ok := shaded[c]; ok {
 		return rows
 	}
-	rows := markdown("```"+c.Lang+"\n"+strings.Join(c.Lines, "\n")+"\n```", 400)
+	rows := typeset("```"+c.Lang+"\n"+strings.Join(c.Lines, "\n")+"\n```", 400)
 	// Glamour sets a code block off with a blank row either side. They come
 	// off evenly: the code's own first or last line may be blank too.
 	if extra := len(rows) - len(c.Lines); extra > 0 && extra%2 == 0 {
@@ -178,7 +178,7 @@ func shade(c *ask.Code) []string {
 func dent(s string) int { return len(s) - len(strings.TrimLeft(s, " ")) }
 
 // codeTitle names the lines shown: the file and which lines, or the command.
-func codeTitle(c *ask.Code, from, to int) string {
+func codeTitle(c *markdown.Code, from, to int) string {
 	if c.Line == 0 {
 		return sMeta.Render(c.File)
 	}
@@ -187,7 +187,7 @@ func codeTitle(c *ask.Code, from, to int) string {
 
 // codeRows gives lines from to to of a file, numbered, the ones that
 // matter marked, shown from the left edge. For output it gives every line.
-func codeRows(c *ask.Code, from, to int) []string {
+func codeRows(c *markdown.Code, from, to int) []string {
 	var rows []string
 	if c.Line == 0 {
 		for _, l := range c.Lines {

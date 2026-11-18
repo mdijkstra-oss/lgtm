@@ -1,17 +1,16 @@
 # ask
 
-Answers to questions about a codebase, as notebooks: markdown, and in it
-blocks that show something and respond (a flow, a check, colours, a run, a
-change).
+Documents about the codebase, and a place to open them.
 
-An answer is one markdown document. A block is a fenced `strigil-block`
-holding its JSON; a second-level heading starts a section. `parse.go` reads
-that, and says how it is written.
+This slice does not render anything itself. The format a document is
+written in is `kit/markdown`, and `kit/viewer` draws one on screen; `ask`
+uses both. What is its own is which documents there are, finding one by its
+title, and the frame they open in: a palette and a tab per document.
 
-No model is asked yet. Three answers written by hand about this repository
-are built in, to see what reading one is like.
+No model writes documents yet. One written by hand is built in, which shows
+every block of the format and says what each is for.
 
-- `answers/`: the three answers.
+- `docs/`: the document built in.
 - `cli/`: `strigil ask`.
-- `ui/`: the palette to ask with, a tab per question, and the notebook. See
+- `ui/`: the palette to open a document with, and a tab per document. See
   `ui/about.md`.

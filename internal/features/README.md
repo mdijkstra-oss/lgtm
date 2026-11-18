@@ -3,7 +3,7 @@
 One folder per capability. A feature owns its logic, its command and its
 interface pieces, and does not import another feature.
 
-- `ask/`: a question about the codebase, and its answer as a document.
+- `ask/`: documents about the codebase, and a place to open them.
 - `intro/`: the page strigil opens on.
 
 The shape of a feature, leaving out what it does not have:

@@ -9,6 +9,8 @@ components:
   intro_cli: { in: internal/features/intro/cli }
   kit:       { in: [internal/kit, internal/kit/story, internal/kit/story/**] }
   theme:     { in: internal/kit/theme }
+  markdown:       { in: internal/kit/markdown }
+  viewer:    { in: internal/kit/viewer }
 
 vendors:
   cobra:     { in: github.com/spf13/cobra }
@@ -32,19 +34,30 @@ deps:
   intro_cli:
     mayDependOn: [intro_ui]
     canUse: [cobra]
-  # The command hands the interface the answers; both rest on the logic.
+  # The command hands the interface the documents; both rest on the logic.
+  ask:
+    mayDependOn: [markdown]
   ask_cli:
     mayDependOn: [ask, ask_ui]
     canUse: [cobra]
+  # The frame round a viewer. It draws no document itself, so it has no
+  # use for the markdown renderer.
   ask_ui:
-    mayDependOn: [ask, kit, theme]
-    canUse: [bubbletea, bubbles, glamour, lipgloss, xansi]
+    mayDependOn: [ask, markdown, viewer, kit, theme]
+    canUse: [bubbletea, bubbles, lipgloss, xansi]
   intro_ui:
     mayDependOn: [kit, theme]
     canUse: [bubbletea, lipgloss, harmonica]
   kit:
     mayDependOn: [kit]
     canUse: [lipgloss]
+  # markdown has no entry: what a document is made of draws nothing and reaches
+  # for nothing.
+  # A document on screen. It may know the format and the colours, and no
+  # feature; the only place markdown is rendered.
+  viewer:
+    mayDependOn: [markdown, kit, theme]
+    canUse: [bubbletea, bubbles, glamour, lipgloss, xansi]
   # The only place the palette is named.
   theme:
     canUse: [tone]
