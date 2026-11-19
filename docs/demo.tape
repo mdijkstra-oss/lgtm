@@ -1,21 +1,23 @@
-# The recording at the top of README.md: a question a newcomer would ask,
-# about a small router many people know (github.com/go-chi/chi). make demo
-# clones it and runs this. It asks a real model, so it needs lgtm on the
-# PATH and a model configured.
+# The recording at the top of README.md: lgtm in a clone of a router many
+# people know (github.com/go-chi/chi), picking a commit from its history
+# and reading what comes back. make demo makes the clone and runs this. It
+# asks a real model, so it needs lgtm on the PATH and a model configured.
 Output docs/demo.gif
 
 Require lgtm
 
 Set Shell zsh
 Set Width 1300
-Set Height 800
+Set Height 1000
 Set FontSize 15
 Set Framerate 20
-Set TypingSpeed 45ms
+Set TypingSpeed 90ms
 Set WaitTimeout 120s
 
+# The clone has a temporary folder of its own, emptied by make demo, so
+# that no commit was explained before and the model is seen at work.
 Hide
-Type "cd /tmp/lgtm-demo && clear"
+Type "cd /tmp/lgtm-demo && export TMPDIR=/tmp/lgtm-demo/tmp && clear"
 Enter
 Show
 
@@ -24,45 +26,65 @@ Type "cd chi"
 Sleep 300ms
 Enter
 Sleep 500ms
-Type 'lgtm "What happens, step by step, when a request comes in?"'
-Sleep 700ms
+Type "lgtm"
+Sleep 500ms
 Enter
 
-# The index beside a document says "contents": the document is open.
-Wait+Screen /contents/
-Sleep 3s
-
-# The first section, and through the parts of its drawing.
-Type "2"
+# The page opens under the slop, and the blade takes about three seconds
+# to cross. Then the history: down a few rows, and narrowed to one commit
+# by a word of it.
+Sleep 5s
+Down
+Sleep 350ms
+Down
+Sleep 350ms
+Down
+Sleep 900ms
+Type "duplicate"
 Sleep 1500ms
-Down
-Sleep 250ms
-Down
-Sleep 250ms
-Down
-Sleep 800ms
+Enter
+
+# The model at work, for a few seconds. The rest of the wait is cut out of
+# the recording: it takes the model about twenty seconds.
+Sleep 4s
+Hide
+
+# The index beside a document is headed "contents" and a rule: the
+# document is open. The word alone can be on the page before that.
+Wait+Screen /contents ─/
+Show
+Sleep 4500ms
+
+# What it did before, and what it does now.
+Type "2"
+Sleep 1200ms
+Down@250ms 2
+Sleep 3s
 Right
-Sleep 2200ms
+Sleep 3500ms
+
+# How it works, a step at a time.
+Type "3"
+Sleep 1200ms
+Down@250ms 2
+Sleep 3s
 Right
-Sleep 2200ms
+Sleep 3500ms
+
+# The last section is the question to answer before accepting, whichever
+# number it has: the question, a hint, and the answer.
+Hide
+Type "4567"
+Show
+Sleep 1200ms
+Down@250ms 2
+Sleep 3500ms
 Right
 Sleep 2500ms
-
-# The last section is a practice question, whichever number it has.
-Hide
-Type "34567"
-Show
-Sleep 1500ms
-Down
-Sleep 250ms
-Down
-Sleep 1500ms
 Right
 Sleep 2s
 Right
-Sleep 2s
-Right
-Sleep 4s
+Sleep 4500ms
 
 Type "q"
 Sleep 400ms

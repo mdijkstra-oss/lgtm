@@ -8,6 +8,10 @@
     make run     runs lgtm with what .env names; ARGS='"a question"' asks one
     make demo    records docs/demo.gif for the README, from docs/demo.tape
 
+After a change to `internal/features/ask/prompt.md` or to what the checker
+refuses, render the commits of `docs/eval` again and read them against its
+rubric: `docs/eval/run.sh out/round-n`.
+
 ## Folder READMEs
 
 `cmd`, `internal`, every folder directly under `internal` and every slice under
