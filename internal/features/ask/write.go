@@ -39,18 +39,19 @@ type Written struct {
 	Source string
 }
 
-// Write has the model answer a question about the repository at root with
-// a document, and keeps it. with is what every call to the model carries. on is told what happens as it happens,
-// from another goroutine than the caller's.
-func Write(ctx context.Context, model fantasy.LanguageModel, with fantasy.ProviderOptions, root, question string, on func(Event)) (Written, error) {
+// Write has the model write a document on a subject about the repository
+// at root, and keeps it. with is what every call to the model carries. on
+// is told what happens as it happens, from another goroutine than the
+// caller's.
+func Write(ctx context.Context, model fantasy.LanguageModel, with fantasy.ProviderOptions, root string, sub Subject, on func(Event)) (Written, error) {
 	if on == nil {
 		on = func(Event) {}
 	}
-	s := open(root, question, on)
+	s := open(root, sub, on)
 	// What every question starts by reading is handed over with it, which
 	// saves the model the turns it would spend asking.
 	tree, _, _ := s.list(".", 2)
-	say := fmt.Sprintf("The question:\n\n%s\n\nThe repository is at commit %s. Its files, two levels down:\n\n%s\n", question, s.at, tree)
+	say := fmt.Sprintf("%s\n\nThe repository is at commit %s. Its files, two levels down:\n\n%s\n", s.asking(), s.at, tree)
 	for _, name := range []string{"README.md", "AGENTS.md"} {
 		if text, _, err := s.reading(readIn{Path: name}); err == nil {
 			say += "You have read this already:\n\n" + text + "\n"

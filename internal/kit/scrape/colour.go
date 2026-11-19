@@ -34,10 +34,9 @@ var (
 
 	slopInk, slopBack rgb
 
-	// The markers the sentences are gone over with: each runs from one
-	// colour to another along the sentence, and the words are punched out
-	// of it.
-	markers [][2]rgb
+	// The marker the word is gone over with: it runs from one brand colour
+	// to the other along the word, and the code is punched out of it.
+	marker [2]rgb
 )
 
 func init() { Use(theme.Dark) }
@@ -49,19 +48,12 @@ func Use(t theme.Theme) {
 	hot, deep = of(t.Secondary), of(t.Primary)
 	rim = hot.mix(of(t.OnPrimary), 0.6)
 	slopInk, slopBack = of(t.Text4), of(t.Surface3)
-	markers = [][2]rgb{
-		{of(t.Secondary), of(t.Warning)},
-		{of(t.Accent), of(t.Info)},
-		{of(t.Warning), of(t.Success)},
-		{of(t.Info), of(t.Secondary)},
-		{of(t.Secondary), of(t.Accent)},
-	}
+	marker = [2]rgb{of(t.Primary), of(t.Secondary)}
 }
 
-// ink is the marker's colour over column x of a sentence.
-func (s *said) ink(x int) rgb {
-	m := markers[s.hue%len(markers)]
-	return m[0].mix(m[1], float64(x-s.x+1)/float64(len(s.text)+1))
+// ink is the marker's colour over column x of the word.
+func (s *run) ink(x int) rgb {
+	return marker[0].mix(marker[1], float64(x-s.from)/float64(max(1, s.span)))
 }
 
 // trail is the colour left t of the way from the blade to the end of its wake.

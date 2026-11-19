@@ -34,8 +34,8 @@ type Model struct {
 	clean []bool
 	// What the blade knocked loose, falling.
 	bits []bit
-	// The sentences laid over the junk this time.
-	lines []said
+	// The word stamped over the junk.
+	lines []run
 
 	rng *rand.Rand
 }
@@ -47,10 +47,11 @@ type bit struct {
 	body *harmonica.Projectile
 }
 
-// New covers a page with sentences picked afresh.
+// New covers a page.
 func New() Model { return Seeded(uint64(time.Now().UnixNano())) }
 
-// Seeded covers a page with the same pick every time, for showing it.
+// Seeded covers a page so that what falls falls the same way every time,
+// for showing it.
 func Seeded(seed uint64) Model {
 	return Model{
 		sweep: harmonica.NewSpring(harmonica.FPS(FPS), 1.1, 1),
@@ -63,7 +64,7 @@ func (m Model) Soil() Model {
 	m.clean = make([]bool, m.w*m.h)
 	m.blade, m.bladeV, m.scraping, m.wait = -bulge-4, 0, false, 0.9
 	m.bits = nil
-	m.lines = scatter(m.rng, m.w, m.h)
+	m.lines = stamp(m.w, m.h)
 	return m
 }
 
@@ -76,7 +77,7 @@ func (m Model) Size(w, h int) Model {
 	covered := m.scraping || m.wait > 0
 	m.w, m.h = w, h
 	m.clean = make([]bool, w*h)
-	m.lines = scatter(m.rng, w, h)
+	m.lines = stamp(w, h)
 	if !covered {
 		for i := range m.clean {
 			m.clean[i] = true

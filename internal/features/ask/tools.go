@@ -30,12 +30,13 @@ const (
 // session is one question being answered: the repository, what the model
 // has read of it so far, and the document once it is accepted.
 type session struct {
-	root     string
-	question string
-	at       string
-	files    []string // what git does not ignore, sorted
-	known    map[string]bool
-	on       func(Event)
+	root  string
+	sub   Subject
+	size  int // of the change, when the subject is one
+	at    string
+	files []string // what git does not ignore, sorted
+	known map[string]bool
+	on    func(Event)
 
 	mu     sync.Mutex
 	calls  int
@@ -46,8 +47,8 @@ type session struct {
 	out    *Written
 }
 
-func open(root, question string, on func(Event)) *session {
-	s := &session{root: root, question: question, on: on, known: map[string]bool{}, read: map[string][][2]int{}}
+func open(root string, sub Subject, on func(Event)) *session {
+	s := &session{root: root, sub: sub, on: on, known: map[string]bool{}, read: map[string][][2]int{}}
 	if out, err := git(root, "ls-files", "-co", "--exclude-standard", "-z"); err == nil {
 		s.files = strings.Split(strings.TrimRight(out, "\x00"), "\x00")
 	} else {
@@ -456,7 +457,7 @@ func (s *session) write(in writeIn) (string, string, error) {
 	s.mu.Lock()
 	s.tab = in.Tab
 	s.mu.Unlock()
-	return s.hand(src)
+	return s.hand(dedent(src))
 }
 
 func (s *session) fix(in fixIn) (string, string, error) {
@@ -481,7 +482,11 @@ func (s *session) hand(src string) (string, string, error) {
 	s.draft = src
 	tab := s.tab
 	s.mu.Unlock()
-	doc, hard, soft := check(src, s.root, s.seen, s.from)
+	size := s.size
+	if size == noChange && s.sub.Change() != "" {
+		size = medium
+	}
+	doc, hard, soft := check(src, s.root, size, s.seen, s.from)
 	s.mu.Lock()
 	// Too long is asked about once. A second time it is let through: the
 	// reader is better off with a long document than with none.
@@ -513,7 +518,7 @@ func (s *session) keep(doc markdown.Doc, src, tab string) error {
 	if tab = slug(tab, 18); tab == "" {
 		tab = slug(doc.Title, 18)
 	}
-	file, err := save(s.root, tab, s.question, s.at, src+"\n")
+	file, err := save(s.root, tab, s.sub, s.at, src+"\n")
 	if err != nil {
 		return err
 	}

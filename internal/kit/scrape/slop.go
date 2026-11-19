@@ -1,28 +1,6 @@
 package scrape
 
-import (
-	_ "embed"
-	"math/rand/v2"
-	"strings"
-)
-
-// The sentences nobody needed, one a line; lines starting with # name the
-// kind that follows and are skipped.
-//
-//go:embed slop.txt
-var slopFile string
-
-var sentences = func() [][]rune {
-	var out [][]rune
-	for _, l := range strings.Split(slopFile, "\n") {
-		if l = strings.TrimSpace(l); l != "" && !strings.HasPrefix(l, "#") {
-			out = append(out, []rune(l))
-		}
-	}
-	return out
-}()
-
-// What lies under the sentences: code of the kind that piles up.
+// What covers the page: code of the kind that piles up.
 var junk = []string{
 	"utils2_final_v3", "helper", "manager", "wrapper", "AbstractFactoryFactory", "// increment i", "TODO", "fixme",
 	"handleStuff()", "doTheThing()", "data2", "temp_new_copy", "processData", "misc", "common", "base", "impl",
@@ -46,49 +24,70 @@ var junkRows, junkFaint = func() ([][]rune, [][]bool) {
 	return rows, faint
 }()
 
-// said is one sentence laid over the junk.
-type said struct {
-	row, x int
-	text   []rune
-	hue    int // which marker went over it
+// The word stamped over the junk, a letter five dots wide and seven high.
+// It is what was said of all that code.
+var word = [][7]string{
+	{"X....", "X....", "X....", "X....", "X....", "X....", "XXXXX"},
+	{".XXXX", "X....", "X....", "X.XXX", "X...X", "X...X", ".XXXX"},
+	{"XXXXX", "..X..", "..X..", "..X..", "..X..", "..X..", "..X.."},
+	{"X...X", "XX.XX", "X.X.X", "X...X", "X...X", "X...X", "X...X"},
 }
 
-// scatter picks sentences for a screen of w by h and gives each a row of
-// its own, somewhere along it.
-func scatter(rng *rand.Rand, w, h int) []said {
-	var out []said
-	if w < 20 || h < 4 {
+// Dots between two letters.
+const between = 2
+
+// run is a stretch of one row that the marker went over: part of a letter.
+type run struct {
+	row, x, n  int
+	from, span int // where the word starts and how wide it is, for its colour
+}
+
+// stamp lays the word over a page of w by h, in the middle, as large as
+// fits: a dot is a few cells wide and a row or two high, since a cell is
+// twice as high as it is wide. On a page too small for it there is none.
+func stamp(w, h int) []run {
+	dots := len(word)*5 + (len(word)-1)*between
+	for _, size := range [][2]int{{4, 2}, {3, 2}, {2, 1}} {
+		wide, high := dots*size[0], 7*size[1]
+		if wide > w-6 || high > h-5 {
+			continue
+		}
+		x0, y0 := (w-wide)/2, (h-1-high)/2
+		var out []run
+		for l, letter := range word {
+			for y, dotted := range letter {
+				for x := 0; x < 5; x++ {
+					if dotted[x] != 'X' {
+						continue
+					}
+					n := 1
+					for x+n < 5 && dotted[x+n] == 'X' {
+						n++
+					}
+					for r := range size[1] {
+						out = append(out, run{
+							row: y0 + y*size[1] + r, x: x0 + (l*(5+between)+x)*size[0], n: n * size[0],
+							from: x0, span: wide,
+						})
+					}
+					x += n - 1
+				}
+			}
+		}
 		return out
 	}
-	rows := rng.Perm(h - 1)
-	for _, i := range rng.Perm(len(sentences)) {
-		if len(out) >= (h-1)*2/5 {
-			break
-		}
-		s := sentences[i]
-		if len(s) > w-4 {
-			continue
-		}
-		out = append(out, said{row: rows[len(out)], x: 1 + rng.IntN(w-len(s)-2), text: s, hue: len(out)})
-	}
-	return out
+	return nil
 }
 
-// slopAt is what covers a cell: a letter of a sentence, the marker's
-// overrun either side of one, or junk. mark is the sentence the marker went
-// over, if one did; faint says it is junk from further back.
-func slopAt(lines []said, x, row int) (ch rune, mark *said, faint bool) {
-	for i := range lines {
-		s := &lines[i]
-		if s.row != row || x < s.x-1 || x > s.x+len(s.text) {
-			continue
-		}
-		if x == s.x-1 || x == s.x+len(s.text) {
-			return ' ', s, false
-		}
-		return s.text[x-s.x], s, false
-	}
+// slopAt is what covers a cell: junk, and whether the marker went over it
+// there. faint says it is junk from further back.
+func slopAt(runs []run, x, row int) (ch rune, mark *run, faint bool) {
 	r := junkRows[row%len(junkRows)]
 	n := (x + row*7) % len(r)
+	for i := range runs {
+		if s := &runs[i]; s.row == row && x >= s.x && x < s.x+s.n {
+			return r[n], s, false
+		}
+	}
 	return r[n], nil, junkFaint[row%len(junkRows)][n]
 }

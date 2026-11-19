@@ -1,5 +1,6 @@
-// Package ask is the documents there are to read, finding one by its
-// title, and having a model write a new one to answer a question.
+// Package ask is having a model write a document about a repository: to
+// answer a question, or to explain a commit or what is not committed yet.
+// It is also the documents written before, and the history to pick from.
 package ask
 
 import (
@@ -7,7 +8,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"lgtm/internal/kit/markdown"
 )
@@ -39,13 +39,6 @@ func reader(root string) func(string) ([]byte, error) {
 	return func(path string) ([]byte, error) { return os.ReadFile(filepath.Join(root, path)) }
 }
 
-// Docs gives the documents there are, in the order the palette lists them:
-// those written for this repository, the newest first, then the one built in.
-func Docs() []markdown.Doc {
-	root := Root()
-	return append(Saved(root), Builtin(root)...)
-}
-
 // Builtin gives the documents built in. The code they point at is read
 // from root.
 func Builtin(root string) []markdown.Doc {
@@ -60,23 +53,6 @@ func Builtin(root string) []markdown.Doc {
 			}
 		}
 		panic(fmt.Sprintf("docs/%s.md: %v", name, err))
-	}
-	return out
-}
-
-// Find gives the documents whose title has every word of the query.
-func Find(in []markdown.Doc, query string) []markdown.Doc {
-	words := strings.Fields(strings.ToLower(query))
-	var out []markdown.Doc
-next:
-	for _, a := range in {
-		q := strings.ToLower(a.Title)
-		for _, w := range words {
-			if !strings.Contains(q, w) {
-				continue next
-			}
-		}
-		out = append(out, a)
 	}
 	return out
 }

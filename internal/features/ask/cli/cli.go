@@ -1,11 +1,13 @@
-// Package cli is the command that opens the documents, and asks for a new
-// one.
+// Package cli is the command that has a document written and opens the
+// page to read it on.
 package cli
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -15,34 +17,54 @@ import (
 	"lgtm/internal/kit/llm"
 )
 
+// history is how many commits the page can search.
+const history = 500
+
 func Command() *cobra.Command {
 	var plain bool
 	cmd := &cobra.Command{
-		Use:   "ask [question]",
-		Short: "Ask a question about the codebase, or read what was answered before",
-		Long: "With a question, a model reads the repository and answers with a document,\n" +
-			"kept in the system's temporary folder. The model is asked every time: the\n" +
-			"code may have changed. With no question, the documents there are.",
+		Use:   "ask [question | commit]",
+		Short: "Have a question answered, or a change explained",
+		Long: "With a question, a model reads the repository and answers with a document.\n" +
+			"With a commit, as git names one, the document explains that commit. With\n" +
+			"nothing, the history opens to pick a change from: what is not committed yet\n" +
+			"comes first. Documents are kept in the system's temporary folder.",
 		Args: cobra.ArbitraryArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			question := strings.TrimSpace(strings.Join(args, " "))
-			if question == "" {
-				return ui.Run(cmd.Context(), ask.Docs(), nil)
-			}
 			root := ask.Root()
-			out, _ := os.Stdout.Stat()
-			plain = plain || out == nil || out.Mode()&os.ModeCharDevice == 0
-			model, err := llm.FromEnv(cmd.Context())
-			if err != nil {
-				return err
+			// The model is looked for only when something is asked of it:
+			// reading what was written before needs none.
+			write := func(ctx context.Context, sub ask.Subject, on func(ask.Event)) (ask.Written, error) {
+				model, err := llm.FromEnv(ctx)
+				if err != nil {
+					return ask.Written{}, err
+				}
+				return ask.Write(ctx, model, llm.Options(), root, sub, on)
 			}
-			write := func(ctx context.Context, on func(ask.Event)) (ask.Written, error) {
-				return ask.Write(ctx, model, llm.Options(), root, question, on)
+			var first *ask.Subject
+			if text := strings.TrimSpace(strings.Join(args, " ")); text != "" {
+				sub := ask.Named(root, text)
+				first = &sub
 			}
-			if plain {
-				return print(cmd.Context(), write)
+			if out, _ := os.Stdout.Stat(); plain || out == nil || out.Mode()&os.ModeCharDevice == 0 {
+				// With no page to pick on, nothing named is what is not committed.
+				if first == nil {
+					if ask.Uncommitted(root) == 0 {
+						return errors.New("nothing is uncommitted: name a commit, or ask a question")
+					}
+					first = &ask.Subject{Pending: true}
+				}
+				return print(cmd.Context(), *first, write)
 			}
-			return ui.Run(cmd.Context(), ask.Docs(), &ui.Asked{Question: question, Write: write})
+			return ui.Run(cmd.Context(), ui.Start{
+				Repo:        filepath.Base(root),
+				Branch:      ask.Branch(root),
+				History:     ask.History(root, history),
+				Uncommitted: ask.Uncommitted(root),
+				Answers:     ask.Answers(root),
+				Write:       write,
+				First:       first,
+			})
 		},
 	}
 	cmd.Flags().BoolVar(&plain, "plain", false, "print the document instead of opening it")
@@ -51,8 +73,8 @@ func Command() *cobra.Command {
 
 // print is the command with no terminal to draw on: what the model does
 // goes to stderr a line a call, and the document to stdout.
-func print(ctx context.Context, write func(context.Context, func(ask.Event)) (ask.Written, error)) error {
-	w, err := write(ctx, func(e ask.Event) {
+func print(ctx context.Context, sub ask.Subject, write func(context.Context, ask.Subject, func(ask.Event)) (ask.Written, error)) error {
+	w, err := write(ctx, sub, func(e ask.Event) {
 		if e.Done {
 			mark := "✓"
 			if e.Failed {

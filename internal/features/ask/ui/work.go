@@ -2,6 +2,7 @@ package ui
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -11,14 +12,14 @@ import (
 	"github.com/charmbracelet/x/ansi"
 
 	"lgtm/internal/features/ask"
-	"lgtm/internal/kit/markdown"
 	"lgtm/internal/kit/scrape"
 )
 
-// work is a question being answered: what the model has done so far, and
+// work is a document being written: what the model has done so far, and
 // what it is thinking.
 type work struct {
-	question string
+	sub      ask.Subject
+	question string // the subject, as the page names it
 	steps    []step
 	think    string // the end of what the model is thinking
 	fresh    bool   // a call came since: what it thinks next starts over
@@ -58,14 +59,18 @@ func workTick() tea.Cmd {
 	return tea.Tick(time.Second/10, func(time.Time) tea.Msg { return workMsg{} })
 }
 
-// ask sets the model to work on a question.
-func (m Model) ask(ctx context.Context, asked Asked) (Model, tea.Cmd) {
-	ctx, halt := context.WithCancel(ctx)
+// begin sets the model to work on a subject.
+func (m Model) begin(sub ask.Subject) (Model, tea.Cmd) {
+	ctx, halt := context.WithCancel(m.ctx)
 	feed := make(chan ask.Event, 256)
-	m.choosing = false
-	m.work = &work{question: asked.Question, began: time.Now(), halt: halt, feed: feed}
+	m.work = &work{sub: sub, question: sub.Title(), began: time.Now(), halt: halt, feed: feed}
+	if m.from.Write == nil {
+		m.work.err = errors.New("there is no model to ask")
+		return m, nil
+	}
+	write := m.from.Write
 	run := func() tea.Msg {
-		doc, err := asked.Write(ctx, func(e ask.Event) {
+		doc, err := write(ctx, sub, func(e ask.Event) {
 			select {
 			case feed <- e:
 			case <-ctx.Done():
@@ -101,14 +106,15 @@ func listen(feed chan ask.Event) tea.Cmd {
 	}
 }
 
-// stop gives up on the question being answered, if one is.
+// stop gives up on the document being written, if one is, and goes back
+// to where it was asked for.
 func (m Model) stop() Model {
 	if m.work == nil {
 		return m
 	}
 	m.work.halt()
 	m.work = nil
-	m.choosing, m.pick = len(m.tabs) == 0, 0
+	m.home, m.pick = true, 0
 	return m
 }
 
@@ -139,7 +145,8 @@ func (m Model) working(msg tea.Msg) (Model, tea.Cmd) {
 			return m, nil
 		}
 		m.work = nil
-		m.known = append([]markdown.Doc{msg.doc.Doc}, m.known...)
+		m.answers = append([]ask.Answer{{Doc: msg.doc.Doc, Asked: w.question, Change: w.sub.Change(), When: "just now"}}, m.answers...)
+		m.input.Reset()
 		return m.open(msg.doc.Doc), nil
 	}
 	return m, nil

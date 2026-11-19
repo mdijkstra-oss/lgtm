@@ -3,8 +3,8 @@
 One folder per capability. A feature owns its logic, its command and its
 interface pieces, and does not import another feature.
 
-- `ask/`: a question about the codebase answered with a document, and a
-  place to open the documents there are.
+- `ask/`: a question answered, or a change explained, with a document, and
+  the page to ask for one and read it on.
 - `intro/`: the slop and the blade, on a page of their own.
 
 The shape of a feature, leaving out what it does not have:

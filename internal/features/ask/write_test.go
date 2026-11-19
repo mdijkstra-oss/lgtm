@@ -29,7 +29,7 @@ func repo(t *testing.T) *session {
 			t.Fatalf("git %v: %v %s", args, err, out)
 		}
 	}
-	return open(root, "how does a work?", func(Event) {})
+	return open(root, Subject{Question: "how does a work?"}, func(Event) {})
 }
 
 func TestWhatGitIgnoresCannotBeRead(t *testing.T) {
@@ -72,7 +72,7 @@ func TestADocumentIsHeldToWhatWasRead(t *testing.T) {
 	doc := func(body string) string { return "# A title\n\nThe answer.\n\n## A section\n\n" + body + "\n" }
 	link := "[a.go](pkg/a.go#L3-L8)"
 	wrong := func(src string) string {
-		_, hard, soft := check(src, s.root, s.seen, s.from)
+		_, hard, soft := check(src, s.root, noChange, s.seen, s.from)
 		return strings.Join(append(hard, soft...), "\n")
 	}
 
@@ -127,6 +127,62 @@ func TestADocumentNeverAcceptedIsStillGiven(t *testing.T) {
 	}
 }
 
+func TestRemovedCodeLosesTheIndentationItShares(t *testing.T) {
+	got := dedent("Text.\n\n```diff\n-\t\t\tfor x := range xs {\n-\t\t\t\tuse(x)\n-\t\t\t}\n```\n\n\tkept as it is\n")
+	want := "Text.\n\n```diff\n- for x := range xs {\n-     use(x)\n- }\n```\n\n\tkept as it is\n"
+	if got != want {
+		t.Errorf("got:\n%s\nwant:\n%s", got, want)
+	}
+}
+
+func TestOneWordGitKnowsIsACommit(t *testing.T) {
+	s := repo(t)
+	head := Named(s.root, "HEAD")
+	if head.Commit == "" || head.About != "first" || head.Title() != "Commit "+head.Commit+": first" {
+		t.Errorf("HEAD: %+v", head)
+	}
+	for _, text := range []string{"how does HEAD work", "nothing-of-that-name", "--help"} {
+		if sub := Named(s.root, text); sub.Question != text || sub.Commit != "" {
+			t.Errorf("%q: %+v", text, sub)
+		}
+	}
+	if h := History(s.root, 10); len(h) != 1 || h[0].Hash != head.Commit || h[0].Subject != "first" {
+		t.Errorf("history: %+v", h)
+	}
+	if n := Uncommitted(s.root); n != 0 {
+		t.Errorf("%d files uncommitted in a clean repository", n)
+	}
+	os.WriteFile(filepath.Join(s.root, "new.txt"), []byte("x\n"), 0o644)
+	if n := Uncommitted(s.root); n != 1 {
+		t.Errorf("%d files uncommitted, with one new", n)
+	}
+}
+
+func TestAChangeIsKeptAsOne(t *testing.T) {
+	s := repo(t)
+	s.sub = Named(s.root, "HEAD")
+	say := s.asking()
+	if !strings.Contains(say, "Explain commit "+s.sub.Commit) || !strings.Contains(say, "=== pkg/a.go (numbered") || !strings.Contains(say, "    3  + line number xxx") {
+		t.Errorf("asked as: %s", say)
+	}
+	// The lines of the change came with the question, so they can be
+	// linked without being read again.
+	if !s.seen("pkg/a.go", 3, 8) {
+		t.Error("the lines of the change do not count as read")
+	}
+	// A change has to be shown before and after, to step between.
+	if _, _, err := s.write(writeIn{Tab: "first", Markdown: "# The first commit\n\nIt adds a.\n\n[a.go](pkg/a.go#L3-L8)\n"}); err == nil || !strings.Contains(err.Error(), "### Before") {
+		t.Fatalf("a change with nothing to step through: %v", err)
+	}
+	stepped := "# The first commit\n\nIt adds a.\n\n## What a counts\n\nIt counts lines.\n\n### Before\nThere was nothing.\n\n```diff\n- nothing at all was here before\n- nothing at all was here before\n```\n\n### After\nNow there is a.\n\n[a.go](pkg/a.go#L3-L8)\n\n## Try: a line is added\n\n### Question\nWhat is counted?\n\n### Hint 1\nThink.\n\n### Hint 2\nLook.\n\n### Answer\nLines.\n"
+	if _, note, err := s.write(writeIn{Tab: "first", Markdown: stepped}); err != nil {
+		t.Fatal(note, err)
+	}
+	if got := Answers(s.root); len(got) != 1 || got[0].Change != s.sub.Commit {
+		t.Errorf("kept: %+v", got)
+	}
+}
+
 func TestAnAcceptedDocumentIsKeptOutsideTheRepository(t *testing.T) {
 	s := repo(t)
 	s.reading(readIn{Path: "pkg/a.go"})
@@ -136,8 +192,8 @@ func TestAnAcceptedDocumentIsKeptOutsideTheRepository(t *testing.T) {
 	if s.out == nil || s.out.Doc.Tab != "a-work" || s.out.Doc.At == "" {
 		t.Fatalf("written: %+v", s.out)
 	}
-	saved := Saved(s.root)
-	if len(saved) != 1 || saved[0].Title != "How a works" || saved[0].Tab != "a-work" {
+	saved := Answers(s.root)
+	if len(saved) != 1 || saved[0].Doc.Title != "How a works" || saved[0].Doc.Tab != "a-work" || saved[0].Asked != "how does a work?" || saved[0].Change != "" {
 		t.Errorf("saved: %+v", saved)
 	}
 	if out, _ := git(s.root, "status", "--porcelain", "--ignored"); strings.TrimSpace(out) != "!! .env" {

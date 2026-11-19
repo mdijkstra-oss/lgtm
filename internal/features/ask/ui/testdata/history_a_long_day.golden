@@ -1,0 +1,34 @@
+                                                                                                              
+                                                                                                              
+                                                                                                              
+                                                                                                              
+    [1;38;2;236;235;240mshop[m[38;2;96;95;107m  on main[m                                                                                             
+                                                                                                              
+    [38;2;104;255;214m> [m[38;2;96;95;107mS[m[38;2;96;95;107mearch the history, or ask a question[m[38;2;96;95;107m                                                 [m                  
+                                                                                                              
+    [38;2;255;96;255m●[m [38;2;236;235;240mUncommitted changes                                                          [m  [38;2;96;95;107m3 files[m                  
+                                                                                                              
+    [38;2;133;131;146mToday[m                                                                                                     
+    [38;2;96;95;107m [m [38;2;133;131;146mfeat(orders): [m[38;2;191;188;200mreservations expire after fifteen minutes                      [m  [38;2;96;95;107m9c1e7a2[m                  
+    [38;2;96;95;107m [m [38;2;133;131;146mfix(payments): [m[38;2;191;188;200mretry a charge once when the gateway times out                [m  [38;2;96;95;107m41b0d93[m                  
+                                                                                                              
+    [38;2;133;131;146mYesterday[m                                                                                                 
+    [38;2;96;95;107m✓[m [38;2;133;131;146mrefactor(store): [m[38;2;191;188;200mone ledger for stock, in place of two tables                [m  [38;2;96;95;107me77f120[m                  
+                                                                                                              
+    [38;2;133;131;146mMonday[m                                                                                                    
+    [38;2;96;95;107m [m [38;2;133;131;146mfeat(api): [m[38;2;191;188;200ma view of an order with its payments                              [m  [38;2;96;95;107m0aa94c6[m                  
+    [38;2;96;95;107m [m [38;2;133;131;146mchore: [m[38;2;191;188;200mbump the router                                                       [m  [38;2;96;95;107mb3d5518[m                  
+    [38;2;96;95;107m [m [38;2;133;131;146mtest(store): [m[38;2;191;188;200mcover a reservation that is paid as it expires                  [m  [38;2;96;95;107m6f2c8e0[m                  
+    [38;2;96;95;107m [m [38;2;133;131;146mfeat(orders): [m[38;2;191;188;200mcancel an order that was never paid                            [m  [38;2;96;95;107md019a7b[m                  
+    [1;38;2;255;250;241;48;2;107;80;255m  + 3 more                                                                              [m                  
+                                                                                                              
+    [38;2;133;131;146m3 November[m                                                                                                
+    [38;2;96;95;107m [m [38;2;133;131;146m[m[38;2;191;188;200mStart the shop                                                               [m  [38;2;96;95;107m1d0b6a9[m                  
+                                                                                                              
+                                                                                                              
+    [38;2;96;95;107mearlier questions [m[38;2;58;57;67m──────────────────────────────────────────────────────────────────────[m                  
+    [38;2;133;131;146m1[m  [38;2;191;188;200mWhat happens, step by step, when an order is placed?                     [m  [38;2;96;95;107m12 min ago[m                  
+    [38;2;133;131;146m2[m  [38;2;191;188;200mWhy are there two kinds of reservation?                                     [m  [38;2;96;95;107m3 h ago[m                  
+                                                                                                              
+    [38;2;133;131;146m↑/↓[m [38;2;96;95;107mchoose[m[38;2;58;57;67m • [m[38;2;133;131;146menter[m [38;2;96;95;107mshow them[m[38;2;58;57;67m • [m[38;2;133;131;146m1-2[m [38;2;96;95;107mearlier question[m[38;2;58;57;67m • [m[38;2;133;131;146mesc[m [38;2;96;95;107mquit[m                                            
+                                                                                                              
